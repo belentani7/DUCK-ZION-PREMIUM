@@ -1,0 +1,157 @@
+// BELENTANI OMEGA ULTRA
+// Autoría: Pedro Belentani
+// Fecha: 2026-08-14
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String   @default("client")
+  fullName  String   @default("")
+  company   String   @default("")
+  avatarUrl String?
+  phone     String?
+  theme     String   @default("system")
+  language  String   @default("es")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client            Client?
+  sentMessages       Message[] @relation("SentMessages")
+  receivedMessages   Message[] @relation("ReceivedMessages")
+  notificationsSent  Notification[] @relation("SentNotifications")
+  notificationsReceived Notification[] @relation("ReceivedNotifications")
+}
+
+model Client {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  companyName  String
+  contactEmail String
+  phone        String?
+  notes        String?
+  industry     String?
+  city         String?
+  country      String  @default("ES")
+  healthScore  Int     @default(85)
+  churnRisk    Float   @default(0.15)
+  totalRevenue Float   @default(0)
+  lastActivity DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects Project[]
+  invoices Invoice[]
+}
+
+model Project {
+  id            String   @id @default(cuid())
+  clientId      String
+  title         String
+  description   String?
+  status        String   @default("Discovery")
+  priority      String   @default("medium")
+  budget        Float?
+  progress      Int      @default(0)
+  startDate     DateTime?
+  targetEndDate DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  deliverables Deliverable[]
+  messages     Message[]
+  activities   Activity[]
+}
+
+model Deliverable {
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  description String?
+  dueDate     DateTime
+  status      String   @default("Pending")
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  clientId      String
+  invoiceNumber String        @unique
+  issueDate     DateTime
+  dueDate       DateTime
+  status        String        @default("Draft")
+  totalAmount   Float
+  taxAmount     Float         @default(0)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  client Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items  InvoiceItem[]
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Float
+  createdAt   DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  recipientId String
+  projectId   String?
+  content     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  sender    User    @relation("SentMessages", fields: [senderId], references: [id])
+  recipient User    @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  project   Project? @relation(fields: [projectId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  senderId  String?
+  userId    String
+  title     String
+  content   String
+  type      String   @default("info")
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  senderUser  User?  @relation("SentNotifications", fields: [senderId], references: [id])
+  targetUser  User   @relation("ReceivedNotifications", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  projectId   String?
+  clientId    String?
+  userId      String
+  action      String
+  description String
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}

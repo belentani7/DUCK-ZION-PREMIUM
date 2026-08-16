@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>DUCK / BELENTANI · CANAL ZION · MANUAL PREMIUM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;600&display=swap');
+  :root{
+    --void:#0B0B0E; --bone:#F5F0E8; --crimson:#FF6977; --crimson-d:#B8333F;
+    --cyan:#64EECF; --amber:#FFC36A; --fog:#B8BBC4; --ink:#F5F0E8; --paper:#0B0B0E;
+    --serif:'Cormorant Garamond',Georgia,serif; --display:'Cinzel',Georgia,serif;
+    --sans:'Inter',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ background:var(--paper); color:var(--ink); font-family:var(--serif); font-size:12.5pt; line-height:1.62; }
+  @page{ size:A4; margin:20mm 18mm 20mm 18mm;
+    @top-left{ content:"DUCK / BELENTANI · CANAL ZION"; font-family:var(--sans); font-size:6.5pt; letter-spacing:.28em; color:#8a8273; }
+    @top-right{ content:"MANUAL PREMIUM · OMEGA ULTRA"; font-family:var(--sans); font-size:6.5pt; letter-spacing:.28em; color:#8a8273; }
+    @bottom-center{ content:counter(page); font-family:var(--sans); font-size:8pt; letter-spacing:.2em; color:#8a8273; }
+  }
+  @page:first{ @top-left{content:none;} @top-right{content:none;} @bottom-center{content:none;} }
+  @page cover-page{ margin:0; @top-left{content:none;} @top-right{content:none;} @bottom-center{content:none;} }
+
+  .cover{ page:cover-page; width:100%; height:297mm; background:radial-gradient(ellipse 60% 40% at 50% 40%, rgba(255,105,119,.16), transparent 70%), var(--void); color:var(--bone); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden; }
+  .cover .gema{ width:60mm; height:60mm; object-fit:cover; border-radius:50%; box-shadow:0 0 70px rgba(100,238,207,.35); margin-bottom:12mm; filter:saturate(1.1); }
+  .cover .eyebrow{ font-family:var(--sans); font-size:8pt; letter-spacing:.55em; text-transform:uppercase; color:var(--amber); margin-bottom:6mm; }
+  .cover h1{ font-family:var(--display); font-weight:600; font-size:38pt; letter-spacing:.22em; text-transform:uppercase; color:var(--bone); margin-bottom:4mm; }
+  .cover .sub{ font-family:var(--serif); font-style:italic; font-size:16pt; color:var(--fog); }
+  .cover .rule{ width:44mm; height:.4mm; background:linear-gradient(90deg,transparent,var(--crimson),transparent); margin:10mm 0; }
+  .cover .chips{ font-family:var(--sans); font-size:7.5pt; letter-spacing:.25em; color:var(--cyan); }
+
+  .chapter{ break-before:page; }
+  .chapter-head{ margin-bottom:9mm; }
+  .chapnum{ font-family:var(--sans); font-size:8.5pt; letter-spacing:.5em; text-transform:uppercase; color:var(--crimson-d); margin-bottom:3mm; }
+  h2{ font-family:var(--display); font-weight:600; font-size:19pt; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); line-height:1.25; }
+  .chaprule{ width:22mm; height:.5mm; background:linear-gradient(90deg,var(--crimson-d),transparent); margin-top:4mm; }
+  p{ margin-bottom:3.2mm; text-align:justify; }
+  .lead{ font-size:13pt; color:#cfc8bb; }
+  .sigill{ margin:6mm 0; padding:5mm 6mm; border:.3mm solid #2a2a30; border-left:1.2mm solid var(--crimson-d); background:#121216; font-family:var(--sans); font-size:9.5pt; line-height:1.7; color:#cfc8bb; }
+  .sigill b{ color:var(--bone); }
+  h3{ font-family:var(--display); font-size:12pt; letter-spacing:.14em; text-transform:uppercase; color:var(--crimson-d); margin:6mm 0 3mm; }
+  h4{ font-family:var(--sans); font-weight:600; font-size:10pt; letter-spacing:.08em; color:var(--ink); margin:4mm 0 2mm; }
+  ul,ol{ margin:0 0 3.2mm 6mm; }
+  li{ margin-bottom:1.4mm; }
+  table{ width:100%; border-collapse:collapse; margin:4mm 0; font-family:var(--sans); font-size:8.5pt; }
+  th{ background:#121216; color:var(--crimson); font-weight:600; text-align:left; padding:2mm; border:.2mm solid #2a2a30; letter-spacing:.08em; text-transform:uppercase; font-size:7.5pt; }
+  td{ padding:2mm; border:.2mm solid #2a2a30; color:#cfc8bb; vertical-align:top; }
+  .grid{ display:flex; gap:4mm; margin:4mm 0; }
+  .grid .box{ flex:1; padding:4mm; background:#121216; border:.3mm solid #2a2a30; border-top:1mm solid var(--crimson-d); }
+  .grid .box .t{ font-family:var(--sans); font-size:8pt; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); margin-bottom:2mm; }
+  .grid .box .v{ font-family:var(--sans); font-size:11pt; font-weight:600; color:var(--bone); }
+  .terminal{ background:#050508; border:.3mm solid #2a2a30; border-left:1.2mm solid var(--cyan); padding:4mm 5mm; font-family:'Cascadia Mono',Consolas,monospace; font-size:8.5pt; line-height:1.7; color:var(--cyan); margin:4mm 0; white-space:pre-wrap; }
+  .tag{ display:inline-block; font-family:var(--sans); font-size:6.5pt; letter-spacing:.18em; padding:1mm 2.5mm; border:.2mm solid #2a2a30; border-radius:2mm; margin-right:1.5mm; color:#cfc8bb; }
+  .ok{ color:var(--cyan); } .warn{ color:var(--amber); } .err{ color:var(--crimson); }
+  img.art{ width:100%; border-radius:2mm; border:.3mm solid #2a2a30; margin:3mm 0; }
+</style>
+</head>
+<body>
+
+<!-- ===== PORTADA ===== -->
+<section class="cover">
+  <img class="gema" src="media/duck-green-artifact.png" alt="Gema Nº 01">
+  <div class="eyebrow">Frequência Narrativa Original</div>
+  <h1>DUCK / BELENTANI</h1>
+  <div class="sub">Canal Zion · Manual Premium del Ecosistema</div>
+  <div class="rule"></div>
+  <div class="chips">GEMA Nº 01 · CANAL ZION · STATUS: OPERACIONAL · MMXXVI</div>
+</section>
+
+<!-- ===== 1. MANIFIESTO ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 01</div><h2>Manifiesto</h2><div class="chaprule"></div></div>
+  <p class="lead">DUCK no es una página de artista ni una landing. Es una herramienta real de producción musical con una capa inmersiva encima.</p>
+  <p>El sistema conserva la frecuencia, transforma el ruido en estructura y devuelve una voz navegable. La Gema Nº 01 es el centro: una escultura de piedra preciosa, no una caricatura. La interfaz la rodea sin taparla.</p>
+  <div class="sigill">
+    <b>CHANNEL:</b> ZION &nbsp;·&nbsp; <b>SIGNAL:</b> STABLE &nbsp;·&nbsp; <b>LATENCY:</b> REALTIME &nbsp;·&nbsp; <b>STATUS:</b> OPERACIONAL<br>
+    <b>FRAGMENTO 1 — A ONDA GRAVE:</b> a base de toda história sonora.
+  </div>
+  <p>Regla de oro: el lore se descubre por microcopys, logs, estados y eventos. Nunca se explica en bloque. La interfaz parece una herramienta profesional que accidentalmente contiene una historia mayor.</p>
+</section>
+
+<!-- ===== 2. GEMA Nº 01 ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 02</div><h2>Gema Nº 01</h2><div class="chaprule"></div></div>
+  <div class="grid">
+    <div class="box"><div class="t">Presencia</div><div class="v">60–70% de la altura</div></div>
+    <div class="box"><div class="t">Material</div><div class="v">Esmeralda física</div></div>
+    <div class="box"><div class="t">Rol</div><div class="v">Centro visual</div></div>
+  </div>
+  <img class="art" src="media/duck-green-artifact.png" alt="Artefacto gema esmeralda">
+  <p><strong>Spec:</strong> pato de gema esmeralda tallado en una sola masa escultórica — cero ojos, cero plumas, facetas grandes e irregulares, interior transparente con reflejos blancos fuertes. No es caricatura, no es pato infantil: es piedra preciosa.</p>
+  <p><strong>Audio-reactiva:</strong> cuando hay señal, el glow de la gema reacciona sutilmente. En silencio, respira con el estado del canal.</p>
+</section>
+
+<!-- ===== 3. ARQUITECTURA ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 03</div><h2>Arquitectura</h2><div class="chaprule"></div></div>
+  <p>Mapa de módulos del ecosistema y sus relaciones.</p>
+  <table>
+    <tr><th>Nodo</th><th>Función</th><th>Estado real</th></tr>
+    <tr><td>DUCK STUDIO OS</td><td>Next.js + Prisma, 35 endpoints API, WebSocket, mini-services</td><td class="ok">HERRAMIENTA · completa</td></tr>
+    <tr><td>DUCK-ECOSYSTEM</td><td>React + Vite + tRPC + Drizzle, duckRouters, tests</td><td class="ok">HERRAMIENTA · completa</td></tr>
+    <tr><td>TOOLKIT GEMA 1</td><td>HTML autónomo: afinador, masterização, 8 páginas</td><td class="ok">HERRAMIENTA · funcional</td></tr>
+    <tr><td>STUDIO LOCAL WIN11</td><td>Base de conocimiento de productor PT-BR, plugins, clones</td><td class="ok">HERRAMIENTA · local</td></tr>
+    <tr><td>CANAL ZION</td><td>Terminal de estados, señal, fragmentos</td><td class="ok">OPERACIONAL</td></tr>
+    <tr><td>GEMA Nº 01</td><td>Artefacto central de esmeralda</td><td class="ok">ACTIVA</td></tr>
+    <tr><td>FRAGMENTOS 2–5</td><td>Eco das Montanhas, Frequência Estelar, Núcleo Vulcânico, Vórtice Temporal</td><td class="warn">BLOQUEADOS</td></tr>
+  </table>
+  <p>Principio: <strong>primero inspeccionar, después integrar, después construir, después probar, después corregir, después empaquetar.</strong></p>
+</section>
+
+<!-- ===== 4. HERRAMIENTAS ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 04</div><h2>Herramientas</h2><div class="chaprule"></div></div>
+  <h3>Kit de producción (Web Audio API)</h3>
+  <ul>
+    <li>Sintetizador · mixer multipista · EQ paramétrico · compresor dinámico</li>
+    <li>Secuenciador 16-pad · sampler · gravador multipista</li>
+    <li>Afinador cromático · detector de potencia / loudness · catálogo armónico</li>
+    <li>Analizador: waveform, spectrum, RMS, peak, LUFS estimado, stereo width, phase correlation</li>
+    <li>Mix bus: gain in/out, gain reduction, sidechain visual, clipping warning</li>
+    <li>Master: LUFS target, headroom, dynamics, limiter, loudness history</li>
+  </ul>
+  <h3>Presets</h3>
+  <ul>
+    <li>Guardar · cargar · duplicar · eliminar · exportar JSON · importar JSON</li>
+    <li>Estructura preparada para workflow FL Studio / Vital</li>
+  </ul>
+  <div class="sigill"><b>Nota técnica:</b> no se finge procesamiento que no existe. Lo puramente visual se etiqueta como preview / simulation.</div>
+</section>
+
+<!-- ===== 5. CANAL ZION ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 05</div><h2>Canal Zion</h2><div class="chaprule"></div></div>
+  <div class="terminal">[SIGNAL.IN]     waiting for signal...
+[SPECTRUM.ACTIVE]  scanning...
+[MIX.BUS]         bypass
+[MASTER.ON]       armed
+[ZION.CHANNEL]    open
+[STATUS.OK]       operational</div>
+  <p>Estados dinámicos del sistema:</p>
+  <table>
+    <tr><th>Evento</th><th>Mensaje de transmisión</th></tr>
+    <tr><td>Silencio</td><td><span class="terminal" style="border:none;background:none;padding:0;color:#8a8273">[ZION.CHANNEL] waiting for signal...</span></td></tr>
+    <tr><td>Audio entrando</td><td><span class="terminal" style="border:none;background:none;padding:0;color:#64EECF">[SIGNAL.IN] frequency detected</span></td></tr>
+    <tr><td>Nivel alto</td><td><span class="terminal" style="border:none;background:none;padding:0;color:#FF6977">[WAVEFORM] GRAVE FREQUENCY DETECTED</span></td></tr>
+    <tr><td>Uso continuado</td><td><span class="terminal" style="border:none;background:none;padding:0;color:#FFC36A">FRAGMENT 01 · RESONANCE: STABLE</span></td></tr>
+  </table>
+</section>
+
+<!-- ===== 6. FRAGMENTOS ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 06</div><h2>Fragmentos</h2><div class="chaprule"></div></div>
+  <table>
+    <tr><th>Nº</th><th>Fragmento</th><th>Estado</th></tr>
+    <tr><td>01</td><td><b>A Onda Grave</b> — a base de toda história sonora</td><td class="ok">ATIVO</td></tr>
+    <tr><td>02</td><td>O Eco das Montanhas</td><td class="warn">BLOQUEADO</td></tr>
+    <tr><td>03</td><td>A Frequência Estelar</td><td class="warn">BLOQUEADO</td></tr>
+    <tr><td>04</td><td>O Núcleo Vulcânico</td><td class="warn">BLOQUEADO</td></tr>
+    <tr><td>05</td><td>O Vórtice Temporal</td><td class="warn">BLOQUEADO</td></tr>
+  </table>
+  <p>Solo el primero está desbloqueado. Los demás aparecen como módulos incompletos. El método de desbloqueo se descubre con el uso; no se explica de antemano.</p>
+</section>
+
+<!-- ===== 7. INSTALACIÓN Y API ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 07</div><h2>Instalación y API</h2><div class="chaprule"></div></div>
+  <div class="terminal">npm install
+npm run dev        # http://localhost:3000
+npm run build && npm run start
+docker compose up --build</div>
+  <table>
+    <tr><th>Módulo API</th><th>Rutas</th></tr>
+    <tr><td>Clientes</td><td>/api/clients · /api/clients/[id]</td></tr>
+    <tr><td>Proyectos</td><td>/api/projects · /api/projects/[id] · /api/projects/[id]/files · /api/projects/[id]/qc · /api/projects/[id]/versions</td></tr>
+    <tr><td>Facturas</td><td>/api/invoices · /api/invoices/[id]</td></tr>
+    <tr><td>Automatización</td><td>/api/automations · /api/automations/[id] · /api/chains · /api/chains/[id]</td></tr>
+    <tr><td>Studio</td><td>/api/plugins · /api/plugins/[id] · /api/daw-bridge · /api/analytics · /api/search</td></tr>
+    <tr><td>Sistema</td><td>/api/health · /api/session · /api/stats · /api/activity · /api/audit</td></tr>
+  </table>
+  <div class="terminal">GET /api/health
+{
+  "status": "ok",
+  "channel": "ZION",
+  "version": "v1",
+  "environment": "production"
+}</div>
+</section>
+
+<!-- ===== 8. SEGURIDAD Y DEPLOY ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 08</div><h2>Seguridad y Deploy</h2><div class="chaprule"></div></div>
+  <h3>Seguridad</h3>
+  <ul>
+    <li>Helmet · rate limiting · input validation · CSP razonable · sanitización</li>
+    <li>Secrets SOLO en .env (.env.example: SMTP_HOST/PORT/USER/PASSWORD/MAIL_FROM/MAIL_TO)</li>
+    <li>Stripe por abstracciones, checkout desactivado sin claves reales</li>
+    <li>Nada de credenciales en el código ni en el repositorio</li>
+  </ul>
+  <h3>Deploy</h3>
+  <ul>
+    <li>Dockerfile · docker-compose.yml · README.md · DEPLOY.md · BUILD_REPORT.md</li>
+    <li>PWA: manifest, icons, service worker, offline shell, instalable</li>
+    <li>Railway / Render / VPS con Docker (detectan el Dockerfile solos)</li>
+  </ul>
+  <h3>Plan</h3>
+  <table>
+    <tr><th>Plan</th><th>Acceso</th></tr>
+    <tr><td>FREE</td><td>analyzer básico, waveform, spectrum</td></tr>
+    <tr><td>PRO</td><td>presets, mastering tools, stem workspace, sesiones</td></tr>
+    <tr><td>PREMIUM</td><td>modo inmersivo, análisis avanzado, fragmentos, sesión, export, cloud-ready</td></tr>
+  </table>
+</section>
+
+<!-- ===== 9. QA Y BUILD REPORT ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Capítulo 09</div><h2>QA y Build Report</h2><div class="chaprule"></div></div>
+  <h3>Checklist de aceptación</h3>
+  <table>
+    <tr><th>Punto</th><th>Estado</th></tr>
+    <tr><td>BUILD</td><td class="ok">PASS (duck-studio-delivery, Next build verificado)</td></tr>
+    <tr><td>TESTS</td><td class="ok">PASS (duck-ecosystem: vitest, duck.test.ts)</td></tr>
+    <tr><td>HEALTH</td><td class="ok">PASS (GET /api/health)</td></tr>
+    <tr><td>EMAIL</td><td class="warn">CONFIGURED (SMTP vía .env)</td></tr>
+    <tr><td>PWA</td><td class="ok">READY</td></tr>
+    <tr><td>DOCKER</td><td class="ok">READY (Dockerfile presente)</td></tr>
+    <tr><td>PACKAGE</td><td class="ok">CREATED (deliveries)</td></tr>
+  </table>
+  <div class="sigill">
+    <b>Entregables verificados en disco:</b> duck-studio-delivery (Next.js + Prisma + 35 API) ·
+    DuckStudioToolkit_A_Gema_1.html · DUCK-ECOSYSTEM (React+tRPC+Drizzle) · DUCK-STUDIO-LOCAL-WIN11 ·
+    DUCK-HERRAMIENTAS-2026-08 (2 prompts maestros + manual PDF 18 MB) · DUCK-EXPERIENCIA-INMERSIVA-PACK ·
+    DUCK-A-GEMA-1-LAB · duck.tar · duck-green-artifact.png (Gema Nº 01).
+  </div>
+</section>
+
+<!-- ===== COLOPHON ===== -->
+<section class="chapter">
+  <div class="chapter-head"><div class="chapnum">Colofón</div><h2>DUCK / BELENTANI · CANAL ZION</h2><div class="chaprule"></div></div>
+  <p class="lead">Frequência Narrativa Original · Status: Operacional.</p>
+  <p>Este manual consolida las herramientas reales del ecosistema DUCK verificadas en disco. Los originales permanecen intactos; todo el trabajo se realiza sobre copias.</p>
+  <div class="sigill" style="text-align:center;">
+    GEMA Nº 01 · CANAL ZION · STATUS: OPERACIONAL<br>
+    FRAGMENTO 1 — A ONDA GRAVE<br>
+    <b>Autoría: Pedro Belentani</b> · Edición: 14.08.2026
+  </div>
+</section>
+
+</body>
+</html>

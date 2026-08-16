@@ -1,0 +1,20 @@
+{
+  "desktop": {
+    "title": "Duck Studio OS - A Gema 01",
+    "bodyText": 1754,
+    "password": "DUCK-GEMA-440-LUFS9",
+    "progress": "100%",
+    "locked": [],
+    "gsap": "object",
+    "scrollTrigger": "function",
+    "lenis": "function",
+    "overflow": false
+  },
+  "mobile": {
+    "overflow": false,
+    "width": 390,
+    "viewport": 390,
+    "titleVisible": true
+  },
+  "consoleErrors": []
+}

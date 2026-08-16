@@ -1,0 +1,1137 @@
+     1→'use client';
+     2→
+     3→import { useEffect, useState, useCallback } from 'react';
+     4→import { usePortalStore, type Client, type Project, type Invoice, type Message } from '@/lib/store';
+     5→import { motion, AnimatePresence } from 'framer-motion';
+     6→import { toast } from 'sonner';
+     7→import {
+     8→  LayoutDashboard, FolderKanban, Receipt, MessageSquare, Users, ClipboardCheck,
+     9→  LogOut, Menu, X, ChevronRight, Plus, Eye, ArrowLeft, Search, Send,
+    10→  Sparkles, Shield, Clock, DollarSign, TrendingUp, AlertTriangle, CheckCircle2,
+    11→  Loader2, Building2, Mail, Phone, CalendarDays
+    12→} from 'lucide-react';
+    13→import { Button } from '@/components/ui/button';
+    14→import { Input } from '@/components/ui/input';
+    15→import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+    16→import { Badge } from '@/components/ui/badge';
+    17→import { Label } from '@/components/ui/label';
+    18→import { Separator } from '@/components/ui/separator';
+    19→import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+    20→import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+    21→import { Progress } from '@/components/ui/progress';
+    22→import { Skeleton } from '@/components/ui/skeleton';
+    23→import { ScrollArea } from '@/components/ui/scroll-area';
+    24→import {
+    25→  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    26→} from '@/components/ui/select';
+    27→import {
+    28→  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+    29→} from '@/components/ui/dialog';
+    30→import { StatusBadge } from '@/components/StatusBadge';
+    31→import { DashboardCard } from '@/components/DashboardCard';
+    32→import { MessageThread } from '@/components/MessageThread';
+    33→import { CreateInvoiceForm } from '@/components/CreateInvoiceForm';
+    34→import { ProjectDetail } from '@/components/ProjectDetail';
+    35→import { InvoiceDetail } from '@/components/InvoiceDetail';
+    36→
+    37→// ============ API HELPER ============
+    38→async function api(path: string, options?: RequestInit) {
+    39→  const token = usePortalStore.getState().token;
+    40→  const res = await fetch(path, {
+    41→    ...options,
+    42→    headers: {
+    43→      'Content-Type': 'application/json',
+    44→      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    45→      ...options?.headers,
+    46→    },
+    47→  });
+    48→  if (!res.ok) {
+    49→    const err = await res.json().catch(() => ({ error: 'Error de servidor' }));
+    50→    throw new Error(err.error || 'Error de servidor');
+    51→  }
+    52→  return res.json();
+    53→}
+    54→
+    55→// ============ ANIMATION VARIANTS ============
+    56→const pageVariants = {
+    57→  initial: { opacity: 0, y: 8 },
+    58→  animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+    59→  exit: { opacity: 0, y: -8, transition: { duration: 0.2 } },
+    60→};
+    61→
+    62→const staggerContainer = {
+    63→  animate: { transition: { staggerChildren: 0.06 } },
+    64→};
+    65→
+    66→const staggerItem = {
+    67→  initial: { opacity: 0, y: 12 },
+    68→  animate: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+    69→};
+    70→
+    71→// ============ FORMAT HELPERS ============
+    72→function formatCurrency(n: number) {
+    73→  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n);
+    74→}
+    75→function formatDate(d: string) {
+    76→  return new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    77→}
+    78→function formatTime(d: string) {
+    79→  return new Date(d).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    80→}
+    81→function timeAgo(d: string) {
+    82→  const diff = Date.now() - new Date(d).getTime();
+    83→  const mins = Math.floor(diff / 60000);
+    84→  if (mins < 60) return `hace ${mins}min`;
+    85→  const hours = Math.floor(mins / 60);
+    86→  if (hours < 24) return `hace ${hours}h`;
+    87→  const days = Math.floor(hours / 24);
+    88→  return `hace ${days}d`;
+    89→}
+    90→
+    91→// ============ LOGIN/REGISTER VIEW ============
+    92→function AuthView() {
+    93→  const { authView, setAuthView, setToken, setUser, initSocket } = usePortalStore();
+    94→  const [email, setEmail] = useState('');
+    95→  const [password, setPassword] = useState('');
+    96→  const [fullName, setFullName] = useState('');
+    97→  const [company, setCompany] = useState('');
+    98→  const [loading, setLoading] = useState(false);
+    99→  const [error, setError] = useState('');
+   100→
+   101→  const handleSubmit = async (e: React.FormEvent) => {
+   102→    e.preventDefault();
+   103→    setLoading(true);
+   104→    setError('');
+   105→    try {
+   106→      const action = authView === 'login' ? 'login' : 'signup';
+   107→      const body = authView === 'login'
+   108→        ? { email, password }
+   109→        : { email, password, fullName, company };
+   110→      const data = await api(`/api/auth/${action}`, { method: 'POST', body: JSON.stringify(body) });
+   111→      setToken(data.token);
+   112→      setUser(data.user);
+   113→      initSocket(data.user.id);
+   114→      toast.success(authView === 'login' ? 'Bienvenido de vuelta' : 'Cuenta creada exitosamente');
+   115→    } catch (err: unknown) {
+   116→      setError(err instanceof Error ? err.message : 'Error');
+   117→    } finally {
+   118→      setLoading(false);
+   119→    }
+   120→  };
+   121→
+   122→  return (
+   123→    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+   124→      {/* Background decoration */}
+   125→      <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+   126→      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+   127→
+   128→      <motion.div
+   129→        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+   130→        animate={{ opacity: 1, scale: 1, y: 0 }}
+   131→        transition={{ duration: 0.5, ease: 'easeOut' }}
+   132→        className="relative z-10 w-full max-w-md"
+   133→      >
+   134→        <Card className="shadow-xl shadow-black/5 border-0 rounded-2xl overflow-hidden">
+   135→          {/* Header gradient */}
+   136→          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 px-8 pt-8 pb-10 text-white">
+   137→            <div className="flex items-center gap-2 mb-6">
+   138→              <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
+   139→                <Sparkles className="w-5 h-5" />
+   140→              </div>
+   141→              <span className="text-lg font-bold tracking-tight">ClientPortal</span>
+   142→            </div>
+   143→            <h1 className="text-2xl font-bold mb-1">
+   144→              {authView === 'login' ? 'Bienvenido de vuelta' : 'Crear cuenta'}
+   145→            </h1>
+   146→            <p className="text-emerald-100 text-sm">
+   147→              {authView === 'login'
+   148→                ? 'Inicia sesión para acceder a tu portal'
+   149→                : 'Regístrate como cliente para comenzar'}
+   150→            </p>
+   151→          </div>
+   152→
+   153→          <CardContent className="p-8 pt-6">
+   154→            <form onSubmit={handleSubmit} className="space-y-4">
+   155→              {error && (
+   156→                <div className="bg-rose-50 text-rose-700 px-4 py-2.5 rounded-lg text-sm border border-rose-200">
+   157→                  {error}
+   158→                </div>
+   159→              )}
+   160→
+   161→              {authView === 'signup' && (
+   162→                <>
+   163→                  <div className="space-y-2">
+   164→                    <Label htmlFor="fullName">Nombre completo</Label>
+   165→                    <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Tu nombre" required />
+   166→                  </div>
+   167→                  <div className="space-y-2">
+   168→                    <Label htmlFor="company">Empresa</Label>
+   169→                    <Input id="company" value={company} onChange={e => setCompany(e.target.value)} placeholder="Nombre de tu empresa" />
+   170→                  </div>
+   171→                </>
+   172→              )}
+   173→
+   174→              <div className="space-y-2">
+   175→                <Label htmlFor="email">Email</Label>
+   176→                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" required />
+   177→              </div>
+   178→              <div className="space-y-2">
+   179→                <Label htmlFor="password">Contraseña</Label>
+   180→                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+   181→              </div>
+   182→
+   183→              <Button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 rounded-xl font-semibold transition-all duration-200">
+   184→                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+   185→                {authView === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+   186→              </Button>
+   187→            </form>
+   188→
+   189→            <div className="mt-6 text-center text-sm text-muted-foreground">
+   190→              {authView === 'login' ? (
+   191→                <>¿No tienes cuenta?{' '}
+   192→                  <button onClick={() => { setAuthView('signup'); setError(''); }} className="text-emerald-600 font-medium hover:underline">
+   193→                    Regístrate
+   194→                  </button>
+   195→                </>
+   196→              ) : (
+   197→                <>¿Ya tienes cuenta?{' '}
+   198→                  <button onClick={() => { setAuthView('login'); setError(''); }} className="text-emerald-600 font-medium hover:underline">
+   199→                    Inicia sesión
+   200→                  </button>
+   201→                </>
+   202→              )}
+   203→            </div>
+   204→
+   205→            <Separator className="my-5" />
+   206→
+   207→            <div className="bg-slate-50 rounded-xl p-4">
+   208→              <p className="text-xs font-medium text-muted-foreground mb-2">Cuentas de demostración:</p>
+   209→              <div className="space-y-1.5 text-xs text-muted-foreground">
+   210→                <p><span className="font-mono text-slate-600">admin@portal.com</span> / <span className="font-mono text-slate-600">Admin123!</span></p>
+   211→                <p><span className="font-mono text-slate-600">maria@techcorp.com</span> / <span className="font-mono text-slate-600">Cliente123!</span></p>
+   212→              </div>
+   213→            </div>
+   214→          </CardContent>
+   215→        </Card>
+   216→      </motion.div>
+   217→    </div>
+   218→  );
+   219→}
+   220→
+   221→// ============ CLIENT DASHBOARD ============
+   222→function ClientDashboardView() {
+   223→  const { user, projects, invoices, messages, stats, setClientView, setSelectedProjectId, setSelectedInvoiceId } = usePortalStore();
+   224→  const statValues = stats as Record<string, number>;
+   225→  const recentMessages = messages.slice(-3).reverse();
+   226→  const upcomingDeliverables = projects.flatMap(p => (p.deliverables || []).filter(d => d.status !== 'Approved')).slice(0, 5);
+   227→
+   228→  return (
+   229→    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
+   230→      <div>
+   231→        <h1 className="text-2xl font-bold text-slate-900">¡Hola, {user?.fullName}!</h1>
+   232→        <p className="text-muted-foreground mt-1">Aquí tienes un resumen de tu actividad</p>
+   233→      </div>
+   234→
+   235→      {/* Stats Cards */}
+   236→      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+   237→        <DashboardCard title="Proyectos activos" value={statValues?.totalProjects || 0} icon={<FolderKanban className="w-5 h-5 text-emerald-600" />} />
+   238→        <DashboardCard title="Entregables pendientes" value={statValues?.pendingDeliverables || 0} icon={<ClipboardCheck className="w-5 h-5 text-amber-600" />} />
+   239→        <DashboardCard title="Facturas pendientes" value={statValues?.unpaidInvoices || 0} icon={<Receipt className="w-5 h-5 text-rose-600" />} description={formatCurrency(statValues?.totalOwed || 0)} />
+   240→        <DashboardCard title="Mensajes nuevos" value={statValues?.unreadMessages || 0} icon={<MessageSquare className="w-5 h-5 text-violet-600" />} />
+   241→      </div>
+   242→
+   243→      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+   244→        {/* Recent Projects */}
+   245→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   246→          <CardHeader className="pb-3">
+   247→            <div className="flex items-center justify-between">
+   248→              <CardTitle className="text-lg font-semibold">Proyectos recientes</CardTitle>
+   249→              <Button variant="ghost" size="sm" onClick={() => setClientView('projects')} className="text-emerald-600 hover:text-emerald-700">
+   250→                Ver todos <ChevronRight className="w-4 h-4 ml-1" />
+   251→              </Button>
+   252→            </div>
+   253→          </CardHeader>
+   254→          <CardContent>
+   255→            <div className="space-y-3">
+   256→              {projects.slice(0, 4).map(p => (
+   257→                <motion.div key={p.id} variants={staggerItem}
+   258→                  onClick={() => { setSelectedProjectId(p.id); setClientView('project-detail'); }}
+   259→                  className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors group">
+   260→                  <div className="flex-1 min-w-0">
+   261→                    <p className="font-medium text-sm truncate group-hover:text-emerald-700 transition-colors">{p.title}</p>
+   262→                    <p className="text-xs text-muted-foreground mt-0.5">{p.client?.companyName || user?.company}</p>
+   263→                  </div>
+   264→                  <StatusBadge status={p.status} type="project" />
+   265→                </motion.div>
+   266→              ))}
+   267→              {projects.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No hay proyectos</p>}
+   268→            </div>
+   269→          </CardContent>
+   270→        </Card>
+   271→
+   272→        {/* Recent Messages */}
+   273→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   274→          <CardHeader className="pb-3">
+   275→            <div className="flex items-center justify-between">
+   276→              <CardTitle className="text-lg font-semibold">Mensajes recientes</CardTitle>
+   277→              <Button variant="ghost" size="sm" onClick={() => setClientView('messages')} className="text-emerald-600 hover:text-emerald-700">
+   278→                Ver chat <ChevronRight className="w-4 h-4 ml-1" />
+   279→              </Button>
+   280→            </div>
+   281→          </CardHeader>
+   282→          <CardContent>
+   283→            <div className="space-y-3">
+   284→              {recentMessages.map(m => (
+   285→                <div key={m.id} className="p-3 rounded-xl bg-slate-50">
+   286→                  <div className="flex items-center justify-between mb-1">
+   287→                    <span className="text-xs font-medium text-slate-600">{m.sender?.fullName}</span>
+   288→                    <span className="text-xs text-muted-foreground">{timeAgo(m.createdAt)}</span>
+   289→                  </div>
+   290→                  <p className="text-sm text-slate-700 line-clamp-2">{m.content}</p>
+   291→                </div>
+   292→              ))}
+   293→              {recentMessages.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No hay mensajes</p>}
+   294→            </div>
+   295→          </CardContent>
+   296→        </Card>
+   297→      </div>
+   298→
+   299→      {/* Upcoming Deliverables */}
+   300→      {upcomingDeliverables.length > 0 && (
+   301→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   302→          <CardHeader className="pb-3">
+   303→            <CardTitle className="text-lg font-semibold">Entregables próximos</CardTitle>
+   304→          </CardHeader>
+   305→          <CardContent>
+   306→            <div className="space-y-3">
+   307→              {upcomingDeliverables.map(d => {
+   308→                const isOverdue = new Date(d.dueDate) < new Date() && d.status !== 'Approved';
+   309→                return (
+   310→                  <div key={d.id} className={`flex items-center justify-between p-3 rounded-xl ${isOverdue ? 'bg-rose-50 border border-rose-100' : 'bg-slate-50'}`}>
+   311→                    <div>
+   312→                      <p className="text-sm font-medium">{d.title}</p>
+   313→                      <p className="text-xs text-muted-foreground mt-0.5">{d.project?.title}</p>
+   314→                    </div>
+   315→                    <div className="text-right">
+   316→                      <StatusBadge status={d.status} type="deliverable" />
+   317→                      <p className={`text-xs mt-1 ${isOverdue ? 'text-rose-600 font-medium' : 'text-muted-foreground'}`}>
+   318→                        <CalendarDays className="w-3 h-3 inline mr-1" />{formatDate(d.dueDate)}
+   319→                      </p>
+   320→                    </div>
+   321→                  </div>
+   322→                );
+   323→              })}
+   324→            </div>
+   325→          </CardContent>
+   326→        </Card>
+   327→      )}
+   328→    </motion.div>
+   329→  );
+   330→}
+   331→
+   332→// ============ PROJECTS LIST VIEW ============
+   333→function ProjectsListView({ isAdmin }: { isAdmin: boolean }) {
+   334→  const { projects, setSelectedProjectId, setAdminView, setClientView, user } = usePortalStore();
+   335→  const navigate = (id: string) => {
+   336→    setSelectedProjectId(id);
+   337→    if (isAdmin) setAdminView('project-detail');
+   338→    else setClientView('project-detail');
+   339→  };
+   340→
+   341→  return (
+   342→    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+   343→      <div className="flex items-center justify-between mb-6">
+   344→        <div>
+   345→          <h1 className="text-2xl font-bold text-slate-900">Proyectos</h1>
+   346→          <p className="text-muted-foreground mt-1">{projects.length} proyecto{projects.length !== 1 ? 's' : ''} en total</p>
+   347→        </div>
+   348→      </div>
+   349→
+   350→      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+   351→        {projects.map((p, i) => (
+   352→          <motion.div key={p.id} variants={staggerItem} initial="initial" animate="animate" transition={{ delay: i * 0.05 }}>
+   353→            <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl hover:shadow-xl hover:shadow-black/10 transition-all duration-300 cursor-pointer group h-full"
+   354→              onClick={() => navigate(p.id)}>
+   355→              <CardHeader className="pb-3">
+   356→                <div className="flex items-start justify-between">
+   357→                  <div className="flex-1 min-w-0">
+   358→                    <CardTitle className="text-base font-semibold group-hover:text-emerald-700 transition-colors truncate">{p.title}</CardTitle>
+   359→                    {!isAdmin && (
+   360→                      <CardDescription className="mt-1">{p.description?.substring(0, 80)}...</CardDescription>
+   361→                    )}
+   362→                    {isAdmin && p.client && (
+   363→                      <CardDescription className="mt-1">{p.client.companyName}</CardDescription>
+   364→                    )}
+   365→                  </div>
+   366→                  <StatusBadge status={p.status} type="project" />
+   367→                </div>
+   368→              </CardHeader>
+   369→              <CardContent>
+   370→                {p.deliverables && p.deliverables.length > 0 && (
+   371→                  <div className="mb-3">
+   372→                    <div className="flex justify-between text-xs mb-1">
+   373→                      <span className="text-muted-foreground">Progreso de entregables</span>
+   374→                      <span className="font-medium">{p.deliverables.filter(d => d.status === 'Approved').length}/{p.deliverables.length}</span>
+   375→                    </div>
+   376→                    <Progress value={(p.deliverables.filter(d => d.status === 'Approved').length / p.deliverables.length) * 100} className="h-2" />
+   377→                  </div>
+   378→                )}
+   379→                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+   380→                  {p.startDate && <span className="flex items-center gap-1"><CalendarDays className="w-3 h-3" />{formatDate(p.startDate)}</span>}
+   381→                  {p.targetEndDate && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatDate(p.targetEndDate)}</span>}
+   382→                </div>
+   383→              </CardContent>
+   384→            </Card>
+   385→          </motion.div>
+   386→        ))}
+   387→      </div>
+   388→      {projects.length === 0 && (
+   389→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl p-12 text-center">
+   390→          <FolderKanban className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+   391→          <p className="text-muted-foreground">No hay proyectos disponibles</p>
+   392→        </Card>
+   393→      )}
+   394→    </motion.div>
+   395→  );
+   396→}
+   397→
+   398→// ============ INVOICES LIST VIEW ============
+   399→function InvoicesListView({ isAdmin }: { isAdmin: boolean }) {
+   400→  const { invoices, setSelectedInvoiceId, setAdminView, setClientView, setAdminView: setAView } = usePortalStore();
+   401→  const [filter, setFilter] = useState('all');
+   402→  const filtered = filter === 'all' ? invoices : invoices.filter(i => i.status === filter);
+   403→
+   404→  const navigate = (id: string) => {
+   405→    setSelectedInvoiceId(id);
+   406→    if (isAdmin) setAdminView('invoice-detail');
+   407→    else setClientView('invoice-detail');
+   408→  };
+   409→
+   410→  return (
+   411→    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+   412→      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+   413→        <div>
+   414→          <h1 className="text-2xl font-bold text-slate-900">Facturas</h1>
+   415→          <p className="text-muted-foreground mt-1">{invoices.length} factura{invoices.length !== 1 ? 's' : ''} en total</p>
+   416→        </div>
+   417→        <div className="flex items-center gap-2">
+   418→          <Select value={filter} onValueChange={setFilter}>
+   419→            <SelectTrigger className="w-[160px]">
+   420→              <SelectValue />
+   421→            </SelectTrigger>
+   422→            <SelectContent>
+   423→              <SelectItem value="all">Todas</SelectItem>
+   424→              <SelectItem value="Draft">Borrador</SelectItem>
+   425→              <SelectItem value="Sent">Enviada</SelectItem>
+   426→              <SelectItem value="Paid">Pagada</SelectItem>
+   427→              <SelectItem value="Overdue">Vencida</SelectItem>
+   428→            </SelectContent>
+   429→          </Select>
+   430→          {isAdmin && (
+   431→            <Button onClick={() => setAView('invoice-create')} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
+   432→              <Plus className="w-4 h-4 mr-2" /> Nueva factura
+   433→            </Button>
+   434→          )}
+   435→        </div>
+   436→      </div>
+   437→
+   438→      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl overflow-hidden">
+   439→        <Table>
+   440→          <TableHeader>
+   441→            <TableRow className="bg-slate-50/80">
+   442→              <TableHead className="font-semibold">Número</TableHead>
+   443→              {isAdmin && <TableHead className="font-semibold">Cliente</TableHead>}
+   444→              <TableHead className="font-semibold">Fecha</TableHead>
+   445→              <TableHead className="font-semibold">Vencimiento</TableHead>
+   446→              <TableHead className="font-semibold">Estado</TableHead>
+   447→              <TableHead className="font-semibold text-right">Importe</TableHead>
+   448→              <TableHead className="font-semibold w-10"></TableHead>
+   449→            </TableRow>
+   450→          </TableHeader>
+   451→          <TableBody>
+   452→            {filtered.map(inv => (
+   453→              <TableRow key={inv.id} className="cursor-pointer hover:bg-slate-50/80 transition-colors" onClick={() => navigate(inv.id)}>
+   454→                <TableCell className="font-mono font-medium text-sm">{inv.invoiceNumber}</TableCell>
+   455→                {isAdmin && inv.client && <TableCell className="text-sm">{inv.client.companyName}</TableCell>}
+   456→                <TableCell className="text-sm text-muted-foreground">{formatDate(inv.issueDate)}</TableCell>
+   457→                <TableCell className="text-sm text-muted-foreground">{formatDate(inv.dueDate)}</TableCell>
+   458→                <TableCell><StatusBadge status={inv.status} type="invoice" /></TableCell>
+   459→                <TableCell className="text-right font-semibold">{formatCurrency(inv.totalAmount)}</TableCell>
+   460→                <TableCell><Eye className="w-4 h-4 text-muted-foreground" /></TableCell>
+   461→              </TableRow>
+   462→            ))}
+   463→          </TableBody>
+   464→        </Table>
+   465→        {filtered.length === 0 && (
+   466→          <div className="py-12 text-center text-muted-foreground">
+   467→            <Receipt className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+   468→            <p>No hay facturas</p>
+   469→          </div>
+   470→        )}
+   471→      </Card>
+   472→    </motion.div>
+   473→  );
+   474→}
+   475→
+   476→// ============ MESSAGES VIEW ============
+   477→function MessagesView() {
+   478→  const { user, clients, selectedChatUserId, setSelectedChatUserId, setAdminView, setClientView } = usePortalStore();
+   479→  const isAdmin = user?.role === 'admin';
+   480→
+   481→  const chatPartners = isAdmin
+   482→    ? clients.map(c => ({ id: c.userId, name: c.user?.fullName || c.companyName, company: c.companyName }))
+   483→    : [{ id: 'admin', name: 'Admin Principal', company: 'Mi Agencia' }];
+   484→
+   485→  const activePartner = chatPartners.find(p => p.id === selectedChatUserId) || chatPartners[0];
+   486→
+   487→  return (
+   488→    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="h-[calc(100vh-5rem)] flex flex-col">
+   489→      <div className="mb-4">
+   490→        <h1 className="text-2xl font-bold text-slate-900">Mensajes</h1>
+   491→        <p className="text-muted-foreground mt-1">Comunicación directa con {isAdmin ? 'tus clientes' : 'el equipo'}</p>
+   492→      </div>
+   493→
+   494→      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl flex-1 overflow-hidden flex">
+   495→        {/* Contact list */}
+   496→        <div className="w-64 border-r bg-slate-50/50 flex-shrink-0 hidden md:block">
+   497→          <ScrollArea className="h-full">
+   498→            <div className="p-3 space-y-1">
+   499→              {chatPartners.map(partner => (
+   500→                <button
+   501→                  key={partner.id}
+   502→                  onClick={() => setSelectedChatUserId(partner.id)}
+   503→                  className={`w-full text-left px-3 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+   504→                    selectedChatUserId === partner.id
+   505→                      ? 'bg-emerald-100 text-emerald-800'
+   506→                      : 'hover:bg-slate-100 text-slate-700'
+   507→                  }`}
+   508→                >
+   509→                  <Avatar className="w-9 h-9">
+   510→                    <AvatarFallback className={selectedChatUserId === partner.id ? 'bg-emerald-200' : 'bg-slate-200'}>{partner.name.charAt(0)}</AvatarFallback>
+   511→                  </Avatar>
+   512→                  <div className="min-w-0">
+   513→                    <p className="text-sm font-medium truncate">{partner.name}</p>
+   514→                    <p className="text-xs text-muted-foreground truncate">{partner.company}</p>
+   515→                  </div>
+   516→                </button>
+   517→              ))}
+   518→            </div>
+   519→          </ScrollArea>
+   520→        </div>
+   521→
+   522→        {/* Chat area */}
+   523→        <div className="flex-1 flex flex-col">
+   524→          {activePartner ? (
+   525→            <MessageThread recipientId={activePartner.id} recipientName={activePartner.name} />
+   526→          ) : (
+   527→            <div className="flex-1 flex items-center justify-center text-muted-foreground">
+   528→              <p>Selecciona un contacto para chatear</p>
+   529→            </div>
+   530→          )}
+   531→        </div>
+   532→      </Card>
+   533→    </motion.div>
+   534→  );
+   535→}
+   536→
+   537→// ============ ADMIN: CLIENTS LIST ============
+   538→function AdminClientsView() {
+   539→  const { clients, setSelectedClientId, setAdminView } = usePortalStore();
+   540→  const [search, setSearch] = useState('');
+   541→  const filtered = clients.filter(c =>
+   542→    c.companyName.toLowerCase().includes(search.toLowerCase()) ||
+   543→    c.user?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+   544→    c.contactEmail.toLowerCase().includes(search.toLowerCase())
+   545→  );
+   546→
+   547→  return (
+   548→    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+   549→      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+   550→        <div>
+   551→          <h1 className="text-2xl font-bold text-slate-900">Clientes</h1>
+   552→          <p className="text-muted-foreground mt-1">{clients.length} cliente{clients.length !== 1 ? 's' : ''} registrados</p>
+   553→        </div>
+   554→      </div>
+   555→
+   556→      <div className="mb-4 relative max-w-sm">
+   557→        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+   558→        <Input placeholder="Buscar clientes..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 rounded-xl" />
+   559→      </div>
+   560→
+   561→      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+   562→        {filtered.map((c, i) => (
+   563→          <motion.div key={c.id} variants={staggerItem} initial="initial" animate="animate" transition={{ delay: i * 0.05 }}>
+   564→            <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl hover:shadow-xl hover:shadow-black/10 transition-all duration-300 cursor-pointer group"
+   565→              onClick={() => { setSelectedClientId(c.id); setAdminView('client-detail'); }}>
+   566→              <CardContent className="p-5">
+   567→                <div className="flex items-start gap-3">
+   568→                  <Avatar className="w-11 h-11">
+   569→                    <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold">
+   570→                      {(c.user?.fullName || c.companyName).charAt(0)}
+   571→                    </AvatarFallback>
+   572→                  </Avatar>
+   573→                  <div className="flex-1 min-w-0">
+   574→                    <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors truncate">{c.companyName}</h3>
+   575→                    <p className="text-sm text-muted-foreground">{c.user?.fullName}</p>
+   576→                  </div>
+   577→                </div>
+   578→                <Separator className="my-3" />
+   579→                <div className="space-y-2 text-sm">
+   580→                  <div className="flex items-center gap-2 text-muted-foreground">
+   581→                    <Mail className="w-3.5 h-3.5" />
+   582→                    <span className="truncate">{c.contactEmail}</span>
+   583→                  </div>
+   584→                  {c.phone && (
+   585→                    <div className="flex items-center gap-2 text-muted-foreground">
+   586→                      <Phone className="w-3.5 h-3.5" />
+   587→                      <span>{c.phone}</span>
+   588→                    </div>
+   589→                  )}
+   590→                  {c._count && (
+   591→                    <div className="flex items-center gap-3 pt-2 text-xs">
+   592→                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{c._count.projects} proyectos</span>
+   593→                      <span className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">{c._count.invoices} facturas</span>
+   594→                    </div>
+   595→                  )}
+   596→                </div>
+   597→              </CardContent>
+   598→            </Card>
+   599→          </motion.div>
+   600→        ))}
+   601→      </div>
+   602→      {filtered.length === 0 && (
+   603→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl p-12 text-center">
+   604→          <Users className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+   605→          <p className="text-muted-foreground">No se encontraron clientes</p>
+   606→        </Card>
+   607→      )}
+   608→    </motion.div>
+   609→  );
+   610→}
+   611→
+   612→// ============ ADMIN: CLIENT DETAIL ============
+   613→function AdminClientDetailView() {
+   614→  const { selectedClientId, setAdminView } = usePortalStore();
+   615→  const [client, setClient] = useState<Client | null>(null);
+   616→  const [loading, setLoading] = useState(true);
+   617→
+   618→  useEffect(() => {
+   619→    if (!selectedClientId) return;
+   620→    let cancelled = false;
+   621→    api(`/api/clients/${selectedClientId}`).then(data => {
+   622→      if (!cancelled) { setClient(data); setLoading(false); }
+   623→    }).catch(() => { if (!cancelled) setLoading(false); });
+   624→    return () => { cancelled = true; };
+   625→  }, [selectedClientId]);
+   626→
+   627→  if (loading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full" /></div>;
+   628→  if (!client) return <p>Cliente no encontrado</p>;
+   629→
+   630→  return (
+   631→    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
+   632→      <div className="flex items-center gap-3">
+   633→        <Button variant="ghost" size="sm" onClick={() => setAdminView('clients')} className="text-muted-foreground">
+   634→          <ArrowLeft className="w-4 h-4 mr-1" /> Clientes
+   635→        </Button>
+   636→        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+   637→        <h1 className="text-2xl font-bold text-slate-900">{client.companyName}</h1>
+   638→      </div>
+   639→
+   640→      {/* Client Info Card */}
+   641→      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   642→        <CardContent className="p-6">
+   643→          <div className="flex items-start gap-4">
+   644→            <Avatar className="w-14 h-14">
+   645→              <AvatarFallback className="bg-emerald-100 text-emerald-700 text-lg font-bold">
+   646→                {(client.user?.fullName || client.companyName).charAt(0)}
+   647→              </AvatarFallback>
+   648→            </Avatar>
+   649→            <div className="flex-1">
+   650→              <h2 className="text-lg font-bold">{client.companyName}</h2>
+   651→              <p className="text-muted-foreground">{client.user?.fullName} &middot; {client.user?.email}</p>
+   652→            </div>
+   653→          </div>
+   654→          <Separator className="my-4" />
+   655→          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+   656→            <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-muted-foreground" />{client.contactEmail}</div>
+   657→            {client.phone && <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-muted-foreground" />{client.phone}</div>}
+   658→            {client.notes && <div className="text-muted-foreground italic">{client.notes}</div>}
+   659→          </div>
+   660→        </CardContent>
+   661→      </Card>
+   662→
+   663→      {/* Client Projects */}
+   664→      {client.projects && client.projects.length > 0 && (
+   665→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   666→          <CardHeader><CardTitle className="text-lg font-semibold">Proyectos ({client.projects.length})</CardTitle></CardHeader>
+   667→          <CardContent>
+   668→            <div className="space-y-3">
+   669→              {client.projects.map(p => (
+   670→                <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+   671→                  <div><p className="font-medium text-sm">{p.title}</p><p className="text-xs text-muted-foreground mt-0.5">{p.description?.substring(0, 60)}...</p></div>
+   672→                  <StatusBadge status={p.status} type="project" />
+   673→                </div>
+   674→              ))}
+   675→            </div>
+   676→          </CardContent>
+   677→        </Card>
+   678→      )}
+   679→
+   680→      {/* Client Invoices */}
+   681→      {client.invoices && client.invoices.length > 0 && (
+   682→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   683→          <CardHeader><CardTitle className="text-lg font-semibold">Facturas ({client.invoices.length})</CardTitle></CardHeader>
+   684→          <CardContent>
+   685→            <Table>
+   686→              <TableHeader>
+   687→                <TableRow className="bg-slate-50/80">
+   688→                  <TableHead>Número</TableHead>
+   689→                  <TableHead>Fecha</TableHead>
+   690→                  <TableHead>Estado</TableHead>
+   691→                  <TableHead className="text-right">Importe</TableHead>
+   692→                </TableRow>
+   693→              </TableHeader>
+   694→              <TableBody>
+   695→                {client.invoices.map(inv => (
+   696→                  <TableRow key={inv.id}>
+   697→                    <TableCell className="font-mono text-sm">{inv.invoiceNumber}</TableCell>
+   698→                    <TableCell className="text-sm text-muted-foreground">{formatDate(inv.issueDate)}</TableCell>
+   699→                    <TableCell><StatusBadge status={inv.status} type="invoice" /></TableCell>
+   700→                    <TableCell className="text-right font-semibold">{formatCurrency(inv.totalAmount)}</TableCell>
+   701→                  </TableRow>
+   702→                ))}
+   703→              </TableBody>
+   704→            </Table>
+   705→          </CardContent>
+   706→        </Card>
+   707→      )}
+   708→    </motion.div>
+   709→  );
+   710→}
+   711→
+   712→// ============ ADMIN: DELIVERABLES VIEW ============
+   713→function AdminDeliverablesView() {
+   714→  const { projects } = usePortalStore();
+   715→  const [deliverables, setDeliverables] = useState<import('@/lib/store').Deliverable[]>([]);
+   716→  const [loading, setLoading] = useState(true);
+   717→
+   718→  useEffect(() => {
+   719→    let cancelled = false;
+   720→    api('/api/deliverables').then(data => {
+   721→      if (!cancelled) { setDeliverables(data); setLoading(false); }
+   722→    }).catch(() => { if (!cancelled) setLoading(false); });
+   723→    return () => { cancelled = true; };
+   724→  }, []);
+   725→
+   726→  if (loading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full" /></div>;
+   727→
+   728→  const pending = deliverables.filter(d => d.status === 'Pending');
+   729→  const inReview = deliverables.filter(d => d.status === 'In Review');
+   730→  const approved = deliverables.filter(d => d.status === 'Approved');
+   731→  const rejected = deliverables.filter(d => d.status === 'Rejected');
+   732→
+   733→  return (
+   734→    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
+   735→      <div>
+   736→        <h1 className="text-2xl font-bold text-slate-900">Entregables</h1>
+   737→        <p className="text-muted-foreground mt-1">{deliverables.length} entregable{deliverables.length !== 1 ? 's' : ''} en total</p>
+   738→      </div>
+   739→
+   740→      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+   741→        <DashboardCard title="Pendientes" value={pending.length} icon={<Clock className="w-5 h-5 text-amber-600" />} />
+   742→        <DashboardCard title="En revisión" value={inReview.length} icon={<Eye className="w-5 h-5 text-sky-600" />} />
+   743→        <DashboardCard title="Aprobados" value={approved.length} icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />} />
+   744→        <DashboardCard title="Rechazados" value={rejected.length} icon={<AlertTriangle className="w-5 h-5 text-rose-600" />} />
+   745→      </div>
+   746→
+   747→      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl overflow-hidden">
+   748→        <Table>
+   749→          <TableHeader>
+   750→            <TableRow className="bg-slate-50/80">
+   751→              <TableHead>Entregable</TableHead>
+   752→              <TableHead>Proyecto</TableHead>
+   753→              <TableHead>Cliente</TableHead>
+   754→              <TableHead>Vencimiento</TableHead>
+   755→              <TableHead>Estado</TableHead>
+   756→            </TableRow>
+   757→          </TableHeader>
+   758→          <TableBody>
+   759→            {deliverables.map(d => {
+   760→              const isOverdue = new Date(d.dueDate) < new Date() && d.status !== 'Approved';
+   761→              return (
+   762→                <TableRow key={d.id} className={isOverdue ? 'bg-rose-50/50' : ''}>
+   763→                  <TableCell className="font-medium text-sm">{d.title}</TableCell>
+   764→                  <TableCell className="text-sm">{d.project?.title}</TableCell>
+   765→                  <TableCell className="text-sm text-muted-foreground">{d.project?.client?.companyName || '-'}</TableCell>
+   766→                  <TableCell className={`text-sm ${isOverdue ? 'text-rose-600 font-medium' : 'text-muted-foreground'}`}>{formatDate(d.dueDate)}</TableCell>
+   767→                  <TableCell><StatusBadge status={d.status} type="deliverable" /></TableCell>
+   768→                </TableRow>
+   769→              );
+   770→            })}
+   771→          </TableBody>
+   772→        </Table>
+   773→      </Card>
+   774→    </motion.div>
+   775→  );
+   776→}
+   777→
+   778→// ============ ADMIN: CREATE INVOICE VIEW ============
+   779→function AdminCreateInvoiceView() {
+   780→  const { setAdminView } = usePortalStore();
+   781→  return (
+   782→    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
+   783→      <div className="flex items-center gap-3">
+   784→        <Button variant="ghost" size="sm" onClick={() => setAdminView('invoices')} className="text-muted-foreground">
+   785→          <ArrowLeft className="w-4 h-4 mr-1" /> Facturas
+   786→        </Button>
+   787→        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+   788→        <h1 className="text-2xl font-bold text-slate-900">Nueva factura</h1>
+   789→      </div>
+   790→      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   791→        <CardContent className="p-6">
+   792→          <CreateInvoiceForm onSuccess={() => setAdminView('invoices')} />
+   793→        </CardContent>
+   794→      </Card>
+   795→    </motion.div>
+   796→  );
+   797→}
+   798→
+   799→// ============ ADMIN DASHBOARD ============
+   800→function AdminDashboardView() {
+   801→  const { clients, projects, invoices, stats } = usePortalStore();
+   802→  const s = stats as Record<string, number>;
+   803→  const invoicesByStatus = (stats as Record<string, unknown>).invoicesByStatus as { status: string; _count: number }[] || [];
+   804→  const projectsByStatus = (stats as Record<string, unknown>).projectsByStatus as { status: string; _count: number }[] || [];
+   805→
+   806→  return (
+   807→    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
+   808→      <div>
+   809→        <h1 className="text-2xl font-bold text-slate-900">Panel de Administración</h1>
+   810→        <p className="text-muted-foreground mt-1">Vista general de todos los proyectos y clientes</p>
+   811→      </div>
+   812→
+   813→      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+   814→        <DashboardCard title="Clientes" value={s?.totalClients || 0} icon={<Users className="w-5 h-5 text-emerald-600" />} />
+   815→        <DashboardCard title="Proyectos" value={s?.totalProjects || 0} icon={<FolderKanban className="w-5 h-5 text-amber-600" />} />
+   816→        <DashboardCard title="Facturas pagadas" value={s?.totalInvoices || 0} icon={<DollarSign className="w-5 h-5 text-emerald-600" />} description={formatCurrency(s?.totalRevenue || 0)} />
+   817→        <DashboardCard title="Entregables pendientes" value={s?.pendingDeliverables || 0} icon={<ClipboardCheck className="w-5 h-5 text-sky-600" />} />
+   818→      </div>
+   819→
+   820→      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+   821→        {/* Projects by status */}
+   822→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   823→          <CardHeader><CardTitle className="text-lg font-semibold">Proyectos por estado</CardTitle></CardHeader>
+   824→          <CardContent>
+   825→            <div className="space-y-4">
+   826→              {(['Discovery', 'In Progress', 'Review', 'Completed'] as const).map(status => {
+   827→                const count = projectsByStatus.find(p => p.status === status)?._count || 0;
+   828→                const total = projects.length || 1;
+   829→                const pct = (count / total) * 100;
+   830→                const colors: Record<string, string> = { 'Discovery': 'bg-amber-500', 'In Progress': 'bg-emerald-500', 'Review': 'bg-sky-500', 'Completed': 'bg-violet-500' };
+   831→                return (
+   832→                  <div key={status}>
+   833→                    <div className="flex justify-between text-sm mb-1">
+   834→                      <span className="font-medium">{status}</span>
+   835→                      <span className="text-muted-foreground">{count}</span>
+   836→                    </div>
+   837→                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+   838→                      <div className={`h-full rounded-full ${colors[status]} transition-all duration-500`} style={{ width: `${pct}%` }} />
+   839→                    </div>
+   840→                  </div>
+   841→                );
+   842→              })}
+   843→            </div>
+   844→          </CardContent>
+   845→        </Card>
+   846→
+   847→        {/* Recent invoices */}
+   848→        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+   849→          <CardHeader><CardTitle className="text-lg font-semibold">Facturas recientes</CardTitle></CardHeader>
+   850→          <CardContent>
+   851→            <div className="space-y-3">
+   852→              {invoices.slice(0, 5).map(inv => (
+   853→                <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+   854→                  <div>
+   855→                    <p className="text-sm font-medium">{inv.invoiceNumber}</p>
+   856→                    <p className="text-xs text-muted-foreground">{inv.client?.companyName}</p>
+   857→                  </div>
+   858→                  <div className="text-right">
+   859→                    <p className="text-sm font-semibold">{formatCurrency(inv.totalAmount)}</p>
+   860→                    <StatusBadge status={inv.status} type="invoice" />
+   861→                  </div>
+   862→                </div>
+   863→              ))}
+   864→            </div>
+   865→          </CardContent>
+   866→        </Card>
+   867→      </div>
+   868→
+   869→      {s?.overdueInvoices > 0 && (
+   870→        <Card className="border-rose-200 bg-rose-50/50 rounded-2xl">
+   871→          <CardContent className="p-4 flex items-center gap-3">
+   872→            <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+   873→            <p className="text-sm text-rose-800">Tienes <span className="font-bold">{s.overdueInvoices}</span> factura{s.overdueInvoices !== 1 ? 's' : ''} vencida{s.overdueInvoices !== 1 ? 's' : ''} que requieren atención.</p>
+   874→          </CardContent>
+   875→        </Card>
+   876→      )}
+   877→    </motion.div>
+   878→  );
+   879→}
+   880→
+   881→// ============ APP NAVIGATOR ============
+   882→function AppNavigator() {
+   883→  const { user, clientView, adminView, sidebarOpen, toggleSidebar, logout } = usePortalStore();
+   884→  const isAdmin = user?.role === 'admin';
+   885→
+   886→  const renderContent = () => {
+   887→    if (isAdmin) {
+   888→      switch (adminView) {
+   889→        case 'dashboard': return <AdminDashboardView />;
+   890→        case 'clients': return <AdminClientsView />;
+   891→        case 'client-detail': return <AdminClientDetailView />;
+   892→        case 'projects': return <ProjectsListView isAdmin />;
+   893→        case 'project-detail': return <ProjectDetail projectId={usePortalStore.getState().selectedProjectId || ''} isClient={false} onBack={() => setAdminView('projects')} />;
+   894→        case 'deliverables': return <AdminDeliverablesView />;
+   895→        case 'invoices': return <InvoicesListView isAdmin />;
+   896→        case 'invoice-create': return <AdminCreateInvoiceView />;
+   897→        case 'invoice-detail': return <InvoiceDetail invoiceId={usePortalStore.getState().selectedInvoiceId || ''} isClient={false} onBack={() => setAdminView('invoices')} />;
+   898→        case 'messages': return <MessagesView />;
+   899→        default: return <AdminDashboardView />;
+   900→      }
+   901→    } else {
+   902→      switch (clientView) {
+   903→        case 'dashboard': return <ClientDashboardView />;
+   904→        case 'projects': return <ProjectsListView isAdmin={false} />;
+   905→        case 'project-detail': return <ProjectDetail projectId={usePortalStore.getState().selectedProjectId || ''} isClient={true} onBack={() => setClientView('projects')} />;
+   906→        case 'invoices': return <InvoicesListView isAdmin={false} />;
+   907→        case 'invoice-detail': return <InvoiceDetail invoiceId={usePortalStore.getState().selectedInvoiceId || ''} isClient={true} onBack={() => setClientView('invoices')} />;
+   908→        case 'messages': return <MessagesView />;
+   909→        default: return <ClientDashboardView />;
+   910→      }
+   911→    }
+   912→  };
+   913→
+   914→  const sidebarNavItems = isAdmin
+   915→    ? [
+   916→        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+   917→        { id: 'clients', label: 'Clientes', icon: <Users className="w-5 h-5" /> },
+   918→        { id: 'projects', label: 'Proyectos', icon: <FolderKanban className="w-5 h-5" /> },
+   919→        { id: 'deliverables', label: 'Entregables', icon: <ClipboardCheck className="w-5 h-5" /> },
+   920→        { id: 'invoices', label: 'Facturas', icon: <Receipt className="w-5 h-5" /> },
+   921→        { id: 'messages', label: 'Mensajes', icon: <MessageSquare className="w-5 h-5" /> },
+   922→      ]
+   923→    : [
+   924→        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+   925→        { id: 'projects', label: 'Proyectos', icon: <FolderKanban className="w-5 h-5" /> },
+   926→        { id: 'invoices', label: 'Facturas', icon: <Receipt className="w-5 h-5" /> },
+   927→        { id: 'messages', label: 'Mensajes', icon: <MessageSquare className="w-5 h-5" /> },
+   928→      ];
+   929→
+   930→  const activeView = isAdmin ? adminView : clientView;
+   931→  const handleNav = (id: string) => {
+   932→    if (isAdmin) (usePortalStore.getState() as { setAdminView: (v: string) => void }).setAdminView(id as typeof adminView);
+   933→    else (usePortalStore.getState() as { setClientView: (v: string) => void }).setClientView(id as typeof clientView);
+   934→    if (window.innerWidth < 768) toggleSidebar();
+   935→  };
+   936→
+   937→  const unreadCount = (usePortalStore.getState().stats as Record<string, number>)?.unreadMessages || 0;
+   938→
+   939→  return (
+   940→    <div className="min-h-screen flex bg-slate-50">
+   941→      {/* Mobile overlay */}
+   942→      <AnimatePresence>
+   943→        {sidebarOpen && (
+   944→          <motion.div
+   945→            initial={{ opacity: 0 }}
+   946→            animate={{ opacity: 1 }}
+   947→            exit={{ opacity: 0 }}
+   948→            className="fixed inset-0 bg-black/30 z-40 md:hidden"
+   949→            onClick={toggleSidebar}
+   950→          />
+   951→        )}
+   952→      </AnimatePresence>
+   953→
+   954→      {/* Sidebar */}
+   955→      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200/80 flex flex-col transform transition-transform duration-300 ease-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+   956→        {/* Brand */}
+   957→        <div className="px-5 py-5 flex items-center justify-between">
+   958→          <div className="flex items-center gap-2.5">
+   959→            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
+   960→              <Sparkles className="w-5 h-5 text-white" />
+   961→            </div>
+   962→            <span className="font-bold text-lg tracking-tight">ClientPortal</span>
+   963→          </div>
+   964→          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+   965→            <X className="w-5 h-5" />
+   966→          </Button>
+   967→        </div>
+   968→
+   969→        <Separator />
+   970→
+   971→        {/* Navigation */}
+   972→        <nav className="flex-1 px-3 py-4 space-y-1">
+   973→          {sidebarNavItems.map(item => (
+   974→            <button
+   975→              key={item.id}
+   976→              onClick={() => handleNav(item.id)}
+   977→              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
+   978→                activeView === item.id
+   979→                  ? 'bg-emerald-50 text-emerald-700 shadow-sm'
+   980→                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+   981→              }`}
+   982→            >
+   983→              <span className={activeView === item.id ? 'text-emerald-600' : 'text-slate-400'}>{item.icon}</span>
+   984→              {item.label}
+   985→              {item.id === 'messages' && unreadCount > 0 && (
+   986→                <span className="ml-auto bg-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+   987→                  {unreadCount}
+   988→                </span>
+   989→              )}
+   990→            </button>
+   991→          ))}
+   992→        </nav>
+   993→
+   994→        <Separator />
+   995→
+   996→        {/* User info */}
+   997→        <div className="p-4">
+   998→          <div className="flex items-center gap-3 mb-3">
+   999→            <Avatar className="w-10 h-10">
+  1000→              <AvatarFallback className={`${isAdmin ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} font-semibold`}>
+  1001→                {(user?.fullName || 'U').charAt(0).toUpperCase()}
+  1002→              </AvatarFallback>
+  1003→            </Avatar>
+  1004→            <div className="flex-1 min-w-0">
+  1005→              <p className="text-sm font-semibold truncate">{user?.fullName}</p>
+  1006→              <p className="text-xs text-muted-foreground truncate">{user?.company}</p>
+  1007→            </div>
+  1008→          </div>
+  1009→          <Button variant="outline" size="sm" className="w-full justify-start text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl" onClick={logout}>
+  1010→            <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
+  1011→          </Button>
+  1012→        </div>
+  1013→      </aside>
+  1014→
+  1015→      {/* Main content */}
+  1016→      <main className="flex-1 min-w-0">
+  1017→        {/* Top bar */}
+  1018→        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-6 py-3 flex items-center gap-3">
+  1019→          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+  1020→            <Menu className="w-5 h-5" />
+  1021→          </Button>
+  1022→          <div className="flex-1" />
+  1023→          <div className="flex items-center gap-2">
+  1024→            {isAdmin && (
+  1025→              <Badge variant="secondary" className="bg-amber-100 text-amber-800 font-medium">
+  1026→                <Shield className="w-3 h-3 mr-1" /> Admin
+  1027→              </Badge>
+  1028→            )}
+  1029→          </div>
+  1030→        </header>
+  1031→
+  1032→        {/* Page content */}
+  1033→        <div className="p-6">
+  1034→          <AnimatePresence mode="wait">
+  1035→            {renderContent()}
+  1036→          </AnimatePresence>
+  1037→        </div>
+  1038→      </main>
+  1039→    </div>
+  1040→  );
+  1041→}
+  1042→
+  1043→// ============ MAIN PAGE ============
+  1044→export default function HomePage() {
+  1045→  const { token, user, setUser, setToken, initSocket, setClients, setProjects, setInvoices, setMessages, setStats, logout } = usePortalStore();
+  1046→  const [initializing, setInitializing] = useState(true);
+  1047→
+  1048→  // Restore session on mount
+  1049→  useEffect(() => {
+  1050→    const restore = async () => {
+  1051→      const savedToken = localStorage.getItem('portal_token');
+  1052→      if (!savedToken) {
+  1053→        setInitializing(false);
+  1054→        return;
+  1055→      }
+  1056→      try {
+  1057→        const userData = await api('/api/auth/me');
+  1058→        if (userData) {
+  1059→          setToken(savedToken);
+  1060→          setUser(userData);
+  1061→          initSocket(userData.id);
+  1062→        }
+  1063→      } catch {
+  1064→        logout();
+  1065→      } finally {
+  1066→        setInitializing(false);
+  1067→      }
+  1068→    };
+  1069→    restore();
+  1070→  }, []);
+  1071→
+  1072→  // Fetch data when user is set
+  1073→  useEffect(() => {
+  1074→    if (!user) return;
+  1075→
+  1076→    const fetchData = async () => {
+  1077→      try {
+  1078→        const [statsData] = await Promise.all([
+  1079→          api('/api/stats'),
+  1080→        ]);
+  1081→        setStats(statsData);
+  1082→      } catch (err) {
+  1083→        console.error('Error fetching stats:', err);
+  1084→      }
+  1085→    };
+  1086→    fetchData();
+  1087→  }, [user]);
+  1088→
+  1089→  // Fetch contextual data based on view
+  1090→  useEffect(() => {
+  1091→    if (!user) return;
+  1092→
+  1093→    const isAdmin = user.role === 'admin';
+  1094→    const fetchCtx = async () => {
+  1095→      try {
+  1096→        if (isAdmin) {
+  1097→          const [c, p, inv] = await Promise.all([
+  1098→            api('/api/clients'),
+  1099→            api('/api/projects'),
+  1100→            api('/api/invoices'),
+  1101→          ]);
+  1102→          setClients(c);
+  1103→          setProjects(p);
+  1104→          setInvoices(inv);
+  1105→        } else {
+  1106→          const [p, inv, statsData] = await Promise.all([
+  1107→            api('/api/projects'),
+  1108→            api('/api/invoices'),
+  1109→            api('/api/stats'),
+  1110→          ]);
+  1111→          setProjects(p);
+  1112→          setInvoices(inv);
+  1113→          setStats(statsData);
+  1114→        }
+  1115→      } catch (err) {
+  1116→        console.error('Error fetching data:', err);
+  1117→      }
+  1118→    };
+  1119→    fetchCtx();
+  1120→  }, [user?.id]);
+  1121→
+  1122→  if (initializing) {
+  1123→    return (
+  1124→      <div className="min-h-screen flex items-center justify-center">
+  1125→        <div className="text-center">
+  1126→          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+  1127→            <Sparkles className="w-5 h-5 text-white" />
+  1128→          </div>
+  1129→          <p className="text-muted-foreground text-sm">Cargando portal...</p>
+  1130→        </div>
+  1131→      </div>
+  1132→    );
+  1133→  }
+  1134→
+  1135→  if (!user || !token) return <AuthView />;
+  1136→  return <AppNavigator />;
+  1137→}

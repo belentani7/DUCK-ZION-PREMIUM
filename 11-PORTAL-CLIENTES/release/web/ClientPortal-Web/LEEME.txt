@@ -1,0 +1,5 @@
+CLIENTPORTAL PRO - WEB FULL STACK
+
+Ejecuta start-portal.cmd. Incluye Node, Next.js standalone, SQLite y chat en tiempo real.
+Admin: admin@portal.com / Admin123!
+Cliente: maria@techcorp.com / Cliente123!

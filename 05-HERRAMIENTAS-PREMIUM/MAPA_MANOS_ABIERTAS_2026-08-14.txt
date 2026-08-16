@@ -1,0 +1,266 @@
+================================================================================
+ MAPA COMPLETO — MANOS ABIERTAS (IA · CV · DERECHOS)
+ Proyecto humanitario: centro de aprendizaje multilingüe para personas inmigrantes
+ Generado: 2026-08-14  |  Mapa detallado con rutas, fechas, tamaños y descripciones
+================================================================================
+
+QUÉ ES MANOS ABIERTAS
+--------------------------------------------------------------------------------
+Centro de aprendizaje multilingüe (39 idiomas, RTL incluido) de Pedro Belentani
+que enseña IA, creación de CV y derechos a comunidades inmigrantes/latinoamericanas
+en España. En producción en:
+  - https://mismanosabiertas.netlify.app/           (Netlify, canon live)
+  - https://manosabiertas.space-z.ai/               (Space-Z, variante)
+Estructura de la SPA: Inicio · Aprende IA · Crea tu CV · Office Pack · Recursos ·
+Derechos y Ayudas · Herramientas · Eventos · Cursos · Comunidad.
+Asistente de voz propio llamado "MANOS" (Web Speech API) + sistema de XP/Puntos.
+
+================================================================================
+ 1. INVENTARIO POR UBICACIÓN (ruta | fecha | tamaño | descripción)
+================================================================================
+
+── DESKTOP (Escritorio) ────────────────────────────────────────────────────────
+C:\Users\USER\Desktop\for codex, manos abiertas.html
+   2026-08-12 | 765 KB | Informe Lighthouse/auditoría técnica en HTML (URL live).
+C:\Users\USER\Desktop\AUDITORIA_Y_ANALISIS_MANOS_ABIERTAS.txt
+   2026-08-12 | 4.6 KB | Auditoría completa: diagnóstico Lighthouse (FCP 1.8s,
+   LCP 5.4s), rutas locales, problemas clave (contadores en cero, etc.).
+C:\Users\USER\Desktop\.codex-manosabiertas-vercel-audit\
+   2026-08-13 | Repo Next.js auditado para deploy Vercel.
+   src\components\manos-abiertas\manos-abiertas-app.tsx  (5.7 KB, 13/08)
+   src\components\manos-abiertas\manos-abiertas-client.tsx (617 B, 13/08)
+   docs\MANOS-ABIERTAS-WORLD-CLASS.md (5.8 KB, 13/08) | .next/ compilado.
+   Raíz: Caddyfile, components.json, CORPUS-DATOS-ABIERTOS-ES-PT.md,
+   DOCUMENTACION-COMPLETA.md, GLOSARIO-TERMINOS.md, incident-*.log (login),
+   MANUAL-CONTRIBUCION-CONTENIDO.md, middleware.ts, NETLIFY.md, netlify.toml,
+   next.config.ts, package.json, README.md, ROADMAP-2026-Q3.md.
+C:\Users\USER\Desktop\DUCK-HERRAMIENTAS-2026-08\MAPA_MANOS_ABIERTAS_2026-08-14.txt
+   2026-08-14 | 12.5 KB | ESTE ARCHIVO (mapa completo).
+C:\Users\USER\Desktop\00-HOY-Y-PROYECTOS\01-PROYECTOS\MANOS-ABIERTAS\
+   Accesos directos e histórico del proyecto (del canon original).
+
+── DOWNLOADS ───────────────────────────────────────────────────────────────────
+C:\Users\USER\Downloads\.codex-manos-build-smoke.cjs
+   2026-08-14 | 3.9 KB | Script smoke-test de build para Codex (NUEVO).
+C:\Users\USER\Downloads\manos-tools-dev-4320.out.log
+   2026-08-13 | 295 B | Log de salida de la app manos-tools (puerto 4320).
+C:\Users\USER\Downloads\manos-tools-dev-4320.err.log
+   2026-08-13 | 0 B | Log de error (vacío).
+C:\Users\USER\Downloads\manos-abiertas-master-station (2).html
+   2026-08-13 | 24 KB | "Master OS & AI Station Pro" v2 — app escritorio estilo
+   Windows (title bar azul #2b579a, html2pdf) de Pedro Belentani. (COPIA 2)
+C:\Users\USER\Downloads\manos-trabajo-social.zip
+   2026-08-13 | 186 KB | ZIP NUEVO más reciente: app full-stack "Trabajo Social"
+   generada por Manus AI. Ver descripción completa en sección 3.
+C:\Users\USER\Downloads\manos-abiertas-master-station (1).html
+   2026-08-13 | 24 KB | Master Station v1. (COPIA 1)
+C:\Users\USER\Downloads\chat-Manos Abiertas_ IA y Derechos.txt
+   2026-08-13 | 415 KB | Chat exportado completo del proyecto Manos Abiertas.
+C:\Users\USER\Downloads\manos-abiertas-master-station.html
+   2026-08-13 | 24 KB | Master Station original.
+C:\Users\USER\Downloads\Catálogo Didáctico Global de Manos Abiertas_ 1.000
+     Puntos Curriculares en 39 Idiomas.md
+   2026-08-12 | 14.5 KB | Catálogo curricular completo (md).
+C:\Users\USER\Downloads\Catálogo_Didáctico_Global_de_Manos_Abiertas_1.000
+     Puntos_Curriculares_en_39_Idiomas.docx
+   2026-08-12 | 16.8 KB | Mismo catálogo en formato Word.
+C:\Users\USER\Downloads\cursis manos.tar
+   2026-08-07 | 8.5 MB | Tar de cursos (módulos de aprendizaje).
+C:\Users\USER\Downloads\manos  nolose.tar
+   2026-08-07 | 8.4 MB | Tar adicional (respaldo de contenido).
+C:\Users\USER\Downloads\imagen manos.png
+   2026-08-07 | 1.7 MB | Imagen del proyecto (PNG).
+C:\Users\USER\Downloads\for judas\Biblioteca Abierta - la biblioteca viva del
+     conocimiento libre (8_6_2026 7:11:50 AM).html
+   2026-08-06 | 889 KB | Biblioteca Abierta (vínculo al ecosistema Manos).
+
+── DOCUMENTS — 01_PROYECTOS (raíz) ─────────────────────────────────────────────
+C:\Users\USER\Documents\01_PROYECTOS\manos-abiertas-release-20260812\
+   2026-08-12 | RELEASE Next.js para Netlify. Contiene: AGENTS.md, CLAUDE.md,
+   Caddyfile, components.json, CORPUS-DATOS-ABIERTOS-ES-PT.md,
+   DOCUMENTACION-COMPLETA.md, GLOSARIO-TERMINOS.md, MANUAL-CONTRIBUCION-CONTENIDO.md,
+   NETLIFY.md, netlify.toml, ROADMAP-2026-Q3.md, tailwind.config.ts, tsconfig.json,
+   src\components\manos-abiertas\manos-abiertas-app.tsx + client.tsx (12/08).
+C:\Users\USER\Documents\01_PROYECTOS\manosabiertas-vercel-20260813\
+   2026-08-13 | Variante VERCEL 13/08 (la más nueva de ambas). Mismo set de docs +
+   tsconfig.tsbuildinfo + .next\ compilado. app.tsx/client.tsx actualizados 13/08.
+
+── DOCUMENTS — escritorio\manos (canon amplio) ─────────────────────────────────
+C:\Users\USER\Documents\01_PROYECTOS\escritorio\manos\
+   manosabiertas-repo\          repo fuente Next.js (12/08): package.json,
+      package-lock.json, bun.lock, middleware.ts, netlify.toml, next.config.ts,
+      tailwind.config.ts, ROADMAP-2026-Q3.md, README.md, DOCUMENTACION-COMPLETA.md,
+      GLOSARIO-TERMINOS.md, MANUAL-CONTRIBUCION-CONTENIDO.md, NETLIFY.md,
+      CORPUS-DATOS-ABIERTOS-ES-PT.md, Caddyfile, tsconfig.tsbuildinfo.
+   belentani-studio\            app web "Trabajo Social" (12/08) — CONTENIDO
+      extraído equivalente a manos-trabajo-social.zip. Stack: React 19 + Tailwind 4
+      + Express 4 + tRPC 11 + Drizzle + Manus OAuth + Vitest. Docs:
+      README-CURRICULUM.md, CURRICULUM-DELIVERY-SUMMARY.md,
+      CURRICULUM-INTEGRATION-REPORT.md, CURRICULUM-QUICKSTART.md, FILES-CREATED.txt,
+      COMPLIANCE_LEGAL.md, todo.md, template.json.
+   _zips\                       desempaquetado del workspace (05/08).
+   _extracted\manos-abiertas-proyecto-completo.zip  (03/08, 604 KB, 155 items)
+      + PROYECTO-ANALISIS-COMPLETO.md (13 KB).
+   Zips principales:
+      manos-main-bundle.zip          (05/08, 68.6 MB, 1.014 items)
+      manos-files-bundle.zip         (06/08, 8.2 MB, 30 items)
+      manos-snapshots.zip            (06/08, 8.2 MB, 28 items)
+      manis-bundle.zip               (06/08, 8.2 MB) [copia]
+      zrrrrr-variant.zip             (06/08, 8.2 MB) [variante]
+      plataforma-vision-v2-full-stack.zip (05/08, 739 KB) [APP UPGRADED]
+      manos-abiertas-nextjs-plus-html-snapshots-archive-20260803.zip (6.9 MB, 843 items)
+   Tars:
+      archive-manos-abiertas-nextjs-git-repo-20260803-2142.tar  (3 MB)
+      archive-manos-abiertas-nextjs-git-repo-20260803-2213.tar  (3.5 MB)
+      archive-manos-abiertas-nextjs-git-repo-20260804-1734.tar  (6.9 MB)
+      archive-manos-abiertas-nextjs-source-plus-zip-20260803-2312.tar (4.7 MB)
+      workspace-b28fef3b-c49c-4134-9011-d5a22afa0743.tar (9.3 MB, 05/08)
+      2manos.tar                      (05/08, 4.7 MB)
+   HTMLs single-file:
+      manos-abiertas-space-z-ai-singlefile-v1-20260803-2150.html (891 KB)
+      manos-abiertas-space-z-ai-singlefile-v2-pwa-20260803-2215.html (894 KB)
+      manos-abiertas-z-ai-chat-500-improvements-plan-20260803-2216.html (1.4 MB)
+   Otros:
+      analysis-manos-abiertas-nextjs-seo-a11y-gaps-20260805.md (9.5 KB)
+      transcripcion-prompt-manos-abiertas-GLM52.txt (155 KB, 05/08)
+      html5-boilerplate\ (04/08) proyecto base (gulpfile, CHANGELOG).
+      ChatGPT Image 5 ago 2026*.png (5 imágenes, mockups 05/08, 1.5-1.8 MB).
+
+── DOCUMENTS — escritorio\manos abiertas deploy (10/08) ────────────────────────
+   archive-manos-abiertas-deploy-nextjs-git-repo.tar
+   manos_abiertas_platform_live.html
+   noiacore-2060-v3-mega.html
+   PROMPT-BANCO-DATOS-ABIERTO.md
+   aaa.zip   (6 items: manos-abiertas-ultimate.tar.gz + README/START/ARCHITECTURE/API/FULL_STACK_DELIVERY)
+   files.zip (4 items: SELF_AWARE_ARCHITECTURE.md, FINAL_SELF_AWARE_DELIVERY.md,
+              YOU_NOW_HAVE.md, DOWNLOAD_YOUR_FILES.md)
+   README.es.md / README.md / README.pt-BR.md / worklog.md
+   .git\ (AUTO_MERGE, COMMIT_EDITMSG) | .claude\settings.local.json
+
+── DOCUMENTS — escritorio\otras carpetas de proyecto ───────────────────────────
+   MANOS_ABIERTAS_COURSE_MODULES\           (10/08) módulos de cursos
+   manos-abiertas-canon-20260808\           (14/08) canon
+   manos-abiertas-release-netlify-20260812\ (14/08) release Netlify
+   manos-abiertas-public-20260808\          (12/08) assets públicos
+   manos-abiertas-codex-20260806\           (10/08) trabajo con Codex
+   manos-abiertas-curriculum\               (10/08) curriculum
+   manos-abiertas-verify-20260808\          (10/08) verificación
+   manos-abiertas-npm-install-backup-20260808\ (10/08) backup npm
+   manos-abiertas-bun-broken-verify-20260808\ (10/08) verificación bun roto
+
+── VIDEOS (DRIVE, sincronizado con Google) ─────────────────────────────────────
+C:\Users\USER\Videos\DRIVE\01_PROYECTOS\ManosAbiertas-Optimizacion\
+   2026-08-12/13 | Paquete de optimización + reportes Lighthouse:
+   - mismanosabiertas.netlify.app_2026-08-12_22-27-16.report.html (796 KB)
+   - reports\manos-abiertas-report.html (559 KB) + lighthouse-report-*.json (719 KB)
+   - accessibility-improvements.md | best-practices-improvements.md
+   - performance-improvements.md | seo-checklist.md
+   - optimization-script.js | verify.js | run-lighthouse.bat | package.json
+   - sample-optimized-index.html | README.md | QUE_HACER.md
+   - educativo\ (13/08): QUICK_START.md + módulos accessibility/performance/seo/best-practices
+C:\Users\USER\Videos\DRIVE\02_DOCUMENTOS\...\MANOS-ABIERTAS\
+   Raíces, HTMLs, TXT/docs y ZIPs (2manos.tar, bundles, archives .tar/.zip).
+C:\Users\USER\Videos\DRIVE\02_DOCUMENTOS\...\NOIACORE\
+   MANOS-ABIERTAS-CANON-20260808, 01-HTML-TODOS (atlas), capturas dark/light.
+
+================================================================================
+ 2. ZIPs / TARs — CONTENIDO DETALLADO
+================================================================================
+
+1) manos-trabajo-social.zip  (186 KB — 93 items)  [EL MÁS RECIENTE, 13/08]
+   App full-stack "Trabajo Social" creada por Manus AI (marca __manus__).
+   Stack: React 19 + Tailwind 4 + Express 4 + tRPC 11 + Drizzle + Manus OAuth.
+   client\ (Vite+React+TS, shadcn/ui COMPLETA: accordion, alert-dialog, alert,
+     aspect-ratio, avatar, badge, breadcrumb, button-group, button, calendar, card,
+     carousel, chart, checkbox, collapsible, command, context-menu, dialog, drawer,
+     dropdown-menu, empty, field, form, hover-card, input-group, input-otp, input,
+     item, kbd, label, menubar, navigation-menu, pagination, popover, progress,
+     radio-group, resizable, scroll-area, select, separator, sheet, sidebar,
+     skeleton, slider, sonner, spinner, switch, table, tabs, textarea, toggle-group,
+     toggle, tooltip). Componentes: CvView, ErrorBoundary, Footer, HeroAssistant...
+   server\ (Express 4 + tRPC routers + Drizzle + OAuth callback + tests Vitest).
+   shared\ (tipos/contratos) | patches\ | audit_report.md | ideas.md | todo.md |
+   template.json | package.json | pnpm-lock.yaml | vite.config.ts.
+   NOTA: client/public/__manus__/debug-collector.js + version.json = telemetría de Manus.
+
+2) manos-abiertas-proyecto-completo.zip  (604 KB — 155 items, 03/08)
+   Next.js completo: src/components/manos-abiertas/* (home-section, courses-library,
+   tools-section, open-source-hub, resource-submission-form, document-checklist),
+   src/lib/db.ts + utils.ts, prisma, public, Caddyfile, PROYECTO-ANALISIS-COMPLETO.md.
+
+3) manos-abiertas-nextjs-plus-html-snapshots-archive-20260803.zip (6.9 MB — 843 items)
+   Workspace completo con .git (repo) + snapshots HTML del sitio.
+
+4) manos-main-bundle.zip  (68 MB — 1.014 items, 05/08)
+   Paquete total: carpeta manos/ (tars de 03/08, zip de snapshots, análisis SEO/a11y)
+   + html5-boilerplate (base con .git).
+
+5) manos-files-bundle.zip  (8.2 MB — 30 items, 06/08)
+   Docs y entregables: PROJECT_SUMMARY, DELIVERABLES, DEPLOYMENT, ARCHITECTURE,
+   DESIGN_SYSTEM, IMPLEMENTATION_GUIDE, MASTER_SUMMARY_COMPLETE, SESION_COMPLETA_RESUMEN,
+   BUILD_COMPLETE, PRIVACY, CONTRIBUTING + código (ai-learning-curriculum.ts,
+   cv-generator-ai.ts, immigrant-rights-es.ts, open-library-integration.ts,
+   app_page.tsx, app_layout.tsx, sitemap.ts) + 5 imágenes ChatGPT (mockups 05/08).
+
+6) manos-snapshots.zip  (8.2 MB — 28 items, 06/08)  — snapshot del bundle.
+   manis-bundle.zip y zrrrrr-variant.zip son copias idénticas (8.2 MB).
+
+7) plataforma-vision-v2-full-stack.zip  (739 KB, 05/08)  [APP UPGRADED candidata]
+   Variante "vision v2" full-stack de la plataforma.
+
+8) aaa.zip  (6 items, deploy 10/08)
+   manos-abiertas-ultimate.tar.gz + README/START/ARCHITECTURE/API/FULL_STACK_DELIVERY.
+
+9) files.zip  (4 items, deploy 10/08)
+   SELF_AWARE_ARCHITECTURE.md, FINAL_SELF_AWARE_DELIVERY.md, YOU_NOW_HAVE.md,
+   DOWNLOAD_YOUR_FILES.md.
+
+10) Tars de archivo git (03-04/08): repo 2142 (3 MB), repo 2213 (3.5 MB),
+    repo 1734 (6.9 MB), source+zip 2312 (4.7 MB).
+
+11) Otros tars: 2manos.tar (4.7 MB), workspace-b28fef3b-*.tar (9.3 MB),
+    cursis manos.tar (8.5 MB), manos  nolose.tar (8.4 MB).
+
+================================================================================
+ 3. STACK TÉCNICO
+================================================================================
+- SPA canónica (CSS/JS vanilla): index.html + styles.css + app.js + data.js +
+  i18n.js (39 idiomas) + manifest.webmanifest (PWA). Motor de CV en vivo,
+  generación de PDF, localStorage, voz "Manos", sistema de XP.
+- Next.js (release 20260812 / vercel 20260813): Tailwind + shadcn/ui + Prisma,
+  middleware.ts, netlify.toml/Caddyfile, i18n locale-provider.
+- Vite+React+TS (manos-trabajo-social.zip / belentani-studio): shadcn/ui completa,
+  tRPC + Express + Drizzle + Manus OAuth + Vitest.
+- QA: optimization-script.js, verify.js, run-lighthouse.bat, .codex-manos-build-smoke.cjs,
+  reportes Lighthouse (FCP 1.8s, LCP 5.4s).
+
+================================================================================
+ 4. LÍNEA DE TIEMPO (fechas clave)
+================================================================================
+2026-07-27  canon original del proyecto (SPA vanilla 39 idiomas)
+2026-08-03  snapshots single-file + chat 500 mejoras + tar git (2142/2213/2312)
+2026-08-04  tar git 1734 + html5-boilerplate
+2026-08-05  análisis SEO/a11y + transcripción GLM + imágenes ChatGPT + bundles
+2026-08-06  files-bundle / snapshots / manis / zrrrrr-variant
+2026-08-07  cursis manos.tar + manos nolose.tar + imagen manos.png
+2026-08-08  canon 20260808 + verificación + npm backup + bun verify
+2026-08-10  curso modules + codex 20260806 + curriculum + deploy folder
+2026-08-12  release 20260812 + vercel audit + auditoría + Lighthouse +
+            catálogo 1.000 puntos + repositorio fuente + belentani-studio
+2026-08-13  vercel 20260813 + master-station x3 + manos-trabajo-social.zip +
+            chat exportado + logs manos-tools + Optimizacion educativo/reports
+2026-08-14  .codex-manos-build-smoke.cjs + ESTE MAPA
+
+================================================================================
+ 5. ESTADO / PENDIENTES (de la auditoría del 12/08)
+================================================================================
+- LCP 5.4s: optimizar fuentes y bundle JS.
+- Contadores en cero (hydratación/DOM lag) por corregir.
+- Confirmar deploy canónico: Netlify (mismanosabiertas) vs Vercel (nuevo 13/08).
+- Banco de datos abierto: 3.686+ enlaces verificados (CORPUS-DATOS-ABIERTOS-ES-PT).
+- Catálogo 1.000 puntos curriculares en 39 idiomas (md+docx) listo.
+- Decidir qué hacer con manos-trabajo-social.zip (app Trabajo Social de Manus AI).
+
+================================================================================
+ FIN DEL MAPA — 2026-08-14
+================================================================================

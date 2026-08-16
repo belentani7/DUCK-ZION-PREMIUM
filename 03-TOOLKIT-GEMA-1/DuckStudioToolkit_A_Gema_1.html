@@ -1,0 +1,2265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duck Studio Toolkit — A Gema #1 | Masterização Belentani</title>
+<meta name="description" content="Duck Studio Toolkit - A Gema #1. Suíte DSP profissional com afinador cromático, equalizador paramétrico, rack de masterização, player de beats e gerador de logos para Duck Zion.">
+<meta name="author" content="DUCK / Belentani">
+<meta name="designer" content="Pedro Belentani">
+<meta name="copyright" content="Duck Zion · Belentani 2026">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   DUCK STUDIO TOOLKIT — A GEMA #1
+   Design System: Google UX/UI Emerald & Jade Palette
+   Architecture, DSP & Master Processing by belentani
+   ========================================================================== */
+
+:root {
+  --g-green-50: #e8f5e9;
+  --g-green-100: #c8e6c9;
+  --g-green-400: #66bb6a;
+  --g-green-500: #0F9D58;
+  --g-green-600: #0D8043;
+  --g-green-700: #0B6636;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --mint-glow: #6ee7b7;
+  
+  --bg-dark: #070d0a;
+  --bg-surface: #0e1713;
+  --bg-surface-raised: #14211b;
+  --bg-surface-hover: #1a2c24;
+  --bg-glass: rgba(14, 23, 19, 0.75);
+  
+  --border-subtle: rgba(16, 185, 129, 0.15);
+  --border-active: rgba(16, 185, 129, 0.45);
+  --border-glow: rgba(52, 211, 153, 0.6);
+  
+  --text-primary: #f0fdf4;
+  --text-secondary: #9cb8a7;
+  --text-tertiary: #5d7c6b;
+  --text-accent: #34d399;
+  
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #38bdf8;
+
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --sidebar-w-collapsed: 76px;
+  --sidebar-w-expanded: 260px;
+  --header-h: 64px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+  
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --elevation-1: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --elevation-2: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 16px rgba(16, 185, 129, 0.08);
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Background Animated Canvas */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Loading Splash */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #0e1a14 0%, #060a08 100%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#loader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader-badge {
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--g-green-700), #0a1711);
+  border: 1px solid var(--border-active);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--emerald-400);
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.35);
+  margin-bottom: 24px;
+  animation: pulse-gem 2s ease-in-out infinite;
+}
+.loader-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.loader-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--emerald-400);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.loader-bar-bg {
+  width: 280px;
+  height: 4px;
+  background: var(--bg-surface-raised);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  position: relative;
+}
+.loader-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--g-green-600), var(--emerald-400), var(--mint-glow));
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 12px var(--emerald-500);
+  transition: width 0.3s ease;
+}
+.loader-status {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 14px;
+  letter-spacing: 1px;
+}
+.loader-credit {
+  position: absolute;
+  bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  letter-spacing: 1.5px;
+}
+
+@keyframes pulse-gem {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(16, 185, 129, 0.3); }
+  50% { transform: scale(1.04); box-shadow: 0 0 50px rgba(16, 185, 129, 0.55); }
+}
+
+/* App Container */
+#app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+#app.visible {
+  opacity: 1;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-w-collapsed);
+  height: 100vh;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 10px;
+  transition: width var(--transition-smooth);
+  position: relative;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.sidebar:hover {
+  width: var(--sidebar-w-expanded);
+}
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--g-green-700), var(--bg-surface));
+  border: 1px solid var(--border-active);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--emerald-400);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+.brand-icon:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.45);
+}
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  flex: 1;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+.nav-item:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+.nav-item.active {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: var(--border-active);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5px;
+  height: 20px;
+  background: var(--emerald-400);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px var(--emerald-400);
+}
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  color: var(--emerald-400);
+}
+.nav-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity var(--transition-smooth);
+}
+.sidebar:hover .nav-label {
+  opacity: 1;
+}
+
+.sidebar-bottom {
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Main Content Area */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  position: relative;
+}
+
+/* Top App Header */
+.app-header {
+  height: var(--header-h);
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  flex-shrink: 0;
+}
+.header-title-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--border-active);
+  color: var(--emerald-400);
+  letter-spacing: 0.5px;
+}
+.header-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.audio-state-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.status-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--emerald-400);
+  box-shadow: 0 0 10px var(--emerald-400);
+  animation: blink-led 2s infinite ease-in-out;
+}
+@keyframes blink-led {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.header-clock {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Content Area */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 28px 32px 40px;
+  position: relative;
+}
+.content-area::-webkit-scrollbar {
+  width: 6px;
+}
+.content-area::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-pill);
+}
+
+/* Page Views */
+.view-panel {
+  display: none;
+  animation: fadeIn 0.35s ease forwards;
+}
+.view-panel.active {
+  display: block;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Google-Style Cards & Containers */
+.g-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--elevation-1);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+.g-card:hover {
+  border-color: var(--border-active);
+  box-shadow: var(--elevation-2);
+}
+.g-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.g-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.g-card-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Hero Banner */
+.hero-banner {
+  background: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.15) 0%, rgba(7, 13, 10, 0.8) 70%),
+              linear-gradient(135deg, rgba(14, 23, 19, 0.95), rgba(7, 13, 10, 0.95));
+  border: 1px solid var(--border-active);
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--elevation-2);
+}
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--emerald-400);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid var(--border-active);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.hero-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.hero-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 650px;
+  line-height: 1.6;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.metric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: all var(--transition-fast);
+}
+.metric-card:hover {
+  border-color: var(--border-active);
+  transform: translateY(-2px);
+  background: var(--bg-surface-raised);
+}
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--emerald-400);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  font-family: var(--font-sans);
+}
+.metric-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* Grids */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Google-Style Buttons */
+.btn {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface-raised);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  user-select: none;
+}
+.btn:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-active);
+  color: var(--emerald-400);
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--g-green-600), var(--emerald-500));
+  border-color: var(--emerald-400);
+  color: #03140b;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--emerald-500), var(--mint-glow));
+  color: #03140b;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.76rem;
+}
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Inputs & Form Controls */
+.input-control {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+.input-control:focus {
+  border-color: var(--emerald-400);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+.range-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 5px;
+  background: var(--bg-surface-raised);
+  border-radius: var(--radius-pill);
+  outline: none;
+}
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--emerald-400);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+  transition: transform 0.15s ease;
+}
+.range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* DSP Tuner Module */
+.tuner-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  position: relative;
+  margin-bottom: 24px;
+}
+.tuner-note-hero {
+  font-size: 5.5rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: var(--emerald-400);
+  line-height: 1;
+  text-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+  transition: color 0.15s ease;
+}
+.tuner-note-hero.in-tune {
+  color: var(--mint-glow);
+  text-shadow: 0 0 40px rgba(110, 231, 183, 0.7);
+}
+.tuner-freq {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+.tuner-meter-track {
+  width: 100%;
+  max-width: 440px;
+  height: 8px;
+  background: var(--bg-surface-raised);
+  border-radius: var(--radius-pill);
+  margin: 24px auto 8px;
+  position: relative;
+  overflow: visible;
+}
+.tuner-meter-center {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--emerald-400);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 10px var(--emerald-400);
+}
+.tuner-needle {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--text-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+  transform: translateX(-50%);
+  transition: left 0.08s ease;
+}
+.tuner-cents-readout {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 12px;
+}
+
+/* EQ Canvas */
+.eq-canvas-container {
+  width: 100%;
+  height: 220px;
+  background: #050a07;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 20px;
+}
+.eq-canvas-container canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mastering Multiband Meter */
+.meter-cluster {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  height: 140px;
+  padding: 10px 0;
+  background: #050a07;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 12px;
+}
+.meter-band {
+  width: 10px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.meter-band-fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  border-radius: 4px;
+  background: linear-gradient(to top, var(--g-green-600), var(--emerald-400), var(--warning), var(--danger));
+  transition: height 0.08s ease;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Tracks List */
+.track-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 110px 90px 48px;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  margin-bottom: 8px;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+.track-row:hover {
+  background: var(--bg-surface-raised);
+  border-color: var(--border-active);
+}
+.track-row.playing {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: var(--emerald-400);
+}
+.track-idx {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+.track-meta h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.track-meta span {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+}
+.genre-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  color: var(--emerald-400);
+  text-align: center;
+  background: rgba(16, 185, 129, 0.06);
+}
+.track-bpm {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Logo Preview */
+.logo-canvas-preview {
+  width: 220px;
+  height: 220px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-active);
+  background: #040806;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 3.2rem;
+  font-weight: 800;
+  color: var(--emerald-400);
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  pointer-events: none;
+}
+.toast-msg {
+  pointer-events: auto;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  padding: 14px 22px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-active);
+  background: rgba(14, 23, 19, 0.95);
+  backdrop-filter: blur(20px);
+  color: var(--text-primary);
+  box-shadow: var(--elevation-2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideInToast 0.3s ease forwards;
+}
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Discrete Footer */
+.app-footer {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: var(--bg-glass);
+  border-top: 1px solid var(--border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+.app-footer a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.app-footer a:hover {
+  color: var(--emerald-400);
+}
+
+/* Secret Drawer */
+#secret-panel {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 400px;
+  height: 100vh;
+  background: rgba(7, 13, 10, 0.96);
+  backdrop-filter: blur(30px);
+  border-left: 1px solid var(--border-active);
+  z-index: 50000;
+  padding: 32px;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  box-shadow: -15px 0 50px rgba(0, 0, 0, 0.6);
+}
+#secret-panel.open {
+  right: 0;
+}
+.secret-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.secret-close:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .track-row { grid-template-columns: 30px 1fr 90px 44px; }
+  .track-bpm { display: none; }
+}
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: 64px;
+    flex-direction: row;
+    bottom: 0;
+    top: auto;
+    border-right: none;
+    border-top: 1px solid var(--border-subtle);
+    padding: 0 10px;
+    position: fixed;
+  }
+  .sidebar:hover { width: 100%; }
+  .brand-icon { display: none; }
+  .nav-menu { flex-direction: row; justify-content: space-around; }
+  .nav-item { padding: 8px 12px; }
+  .nav-label { display: none; }
+  .sidebar-bottom { display: none; }
+  .main-wrapper { margin-bottom: 64px; }
+  .content-area { padding: 20px 16px 30px; }
+  .hero-title { font-size: 1.7rem; }
+  .track-row { grid-template-columns: 28px 1fr 40px; }
+  .genre-badge { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Animated Canvas Background -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Loading Screen -->
+<div id="loader">
+  <div class="loader-badge">D</div>
+  <div class="loader-title">DUCK STUDIO</div>
+  <div class="loader-subtitle">A GEMA #1 · GOOGLE UI VERDE</div>
+  <div class="loader-bar-bg"><div class="loader-bar-fill" id="loader-bar"></div></div>
+  <div class="loader-status" id="loader-text">Inicializando motores de áudio DSP...</div>
+  <div class="loader-credit">Sound Architecture & Mastering by belentani · 2026</div>
+</div>
+
+<!-- Secret Drawer -->
+<div id="secret-panel">
+  <button class="secret-close" onclick="toggleSecret()">✕</button>
+  <div style="font-size: 1.1rem; font-weight: 700; color: var(--emerald-400); margin-bottom: 16px;">ACESSO SECRETO · CANAL ZION</div>
+  <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7;">
+    <p><strong style="color: var(--text-primary);">A Gema #1</strong> representa a frequência sonora fundamental.</p><br>
+    <p>Cada cadeia de mixagem e masterização foi calibrada com precisão de estúdio de alta fidelidade para o catálogo de Duck.</p><br>
+    <p style="color: var(--emerald-400); font-style: italic;">"A masterização perfeita não se nota. Se notar, falhou."</p>
+    <p style="color: var(--text-tertiary); font-size: 0.75rem; margin-top: 4px;">— Pedro Belentani</p><br>
+    <div style="padding: 14px; background: rgba(16, 185, 129, 0.08); border-radius: var(--radius-md); border: 1px solid var(--border-active); margin-top: 16px;">
+      <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--emerald-400);">SECRET KEYS UNLOCKED:</div>
+      <div style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-primary); margin-top: 4px;">DUCK-DSP-PRO-2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-root"></div>
+
+<!-- Main App -->
+<div id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand-icon" id="brand-logo" onclick="onBrandClick()">D</div>
+    <nav class="nav-menu">
+      <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+        <div class="nav-icon">⌂</div>
+        <span class="nav-label">Command Center</span>
+      </div>
+      <div class="nav-item" data-page="tuner" onclick="navigateTo('tuner')">
+        <div class="nav-icon">♪</div>
+        <span class="nav-label">Afinador DSP</span>
+      </div>
+      <div class="nav-item" data-page="eq" onclick="navigateTo('eq')">
+        <div class="nav-icon">≡</div>
+        <span class="nav-label">EQ Paramétrico</span>
+      </div>
+      <div class="nav-item" data-page="mastering" onclick="navigateTo('mastering')">
+        <div class="nav-icon">⚡</div>
+        <span class="nav-label">Mastering Rack</span>
+      </div>
+      <div class="nav-item" data-page="player" onclick="navigateTo('player')">
+        <div class="nav-icon">▶</div>
+        <span class="nav-label">Duck Player</span>
+      </div>
+      <div class="nav-item" data-page="plugins" onclick="navigateTo('plugins')">
+        <div class="nav-icon">⚙</div>
+        <span class="nav-label">Arsenal Plugins</span>
+      </div>
+      <div class="nav-item" data-page="logo" onclick="navigateTo('logo')">
+        <div class="nav-icon">◆</div>
+        <span class="nav-label">Gerador Logos</span>
+      </div>
+      <div class="nav-item" data-page="portfolio" onclick="navigateTo('portfolio')">
+        <div class="nav-icon">☰</div>
+        <span class="nav-label">Discografia</span>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="nav-item" onclick="triggerSecretLab()">
+        <div class="nav-icon">◈</div>
+        <span class="nav-label">Belentani Lab</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-title-area">
+        <span class="header-title" id="page-heading">Command Center</span>
+        <span class="header-badge">GEMA #1 · OPERACIONAL</span>
+      </div>
+      <div class="header-right">
+        <div class="audio-state-chip">
+          <div class="status-led"></div>
+          <span id="audio-engine-status">WEB AUDIO 48kHz</span>
+        </div>
+        <div class="header-clock" id="live-clock">00:00:00</div>
+      </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <main class="content-area">
+      <!-- 1. DASHBOARD -->
+      <section class="view-panel active" id="view-dashboard">
+        <div class="hero-banner">
+          <span class="hero-tag">FRAG-01 · A ONDA GRAVE</span>
+          <h1 class="hero-title">Duck Studio OS & Masterização</h1>
+          <p class="hero-desc">Ambiente de engenharia sonora, sintetizadores Web Audio, afinação cromática cirúrgica e cadeia de masterização masterizada por Belentani para Duck Zion.</p>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" data-counter="3240000">0</div>
+            <div class="metric-label">Streams Globais</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" data-counter="156">0</div>
+            <div class="metric-label">Releases & Singles</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" data-counter="58400">0</div>
+            <div class="metric-label">Ouvintes Mensais</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" data-counter="99">0</div>
+            <div class="metric-label">Acurácia DSP (%)</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="g-card">
+            <div class="g-card-header">
+              <div>
+                <div class="g-card-title">Osciloscópio de Frequência ao Vivo</div>
+                <div class="g-card-subtitle">Análise espectral em tempo real (FFT 2048)</div>
+              </div>
+              <button class="btn btn-sm" onclick="triggerSynthTone(440, 'sine')">Testar Tom A4</button>
+            </div>
+            <div class="eq-canvas-container">
+              <canvas id="scope-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-card-header">
+              <div>
+                <div class="g-card-title">Medidores de Nível Multibanda</div>
+                <div class="g-card-subtitle">Sub · Bass · Low-Mid · High-Mid · Air</div>
+              </div>
+              <span class="header-badge" id="meter-lufs-badge">-14.2 LUFS</span>
+            </div>
+            <div class="meter-cluster" id="master-meter-cluster"></div>
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-tertiary); padding: 0 10px;">
+              <span>20Hz</span><span>80Hz</span><span>250Hz</span><span>1kHz</span><span>4kHz</span><span>10kHz</span><span>20kHz</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="g-card">
+          <div class="g-card-header">
+            <div>
+              <div class="g-card-title">Catálogo de Produções Recentes</div>
+              <div class="g-card-subtitle">Mix & Master finalizadas no ecossistema Duck / Belentani</div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="navigateTo('player')">Abrir Player</button>
+          </div>
+          <div id="dashboard-recent-tracks"></div>
+        </div>
+      </section>
+
+      <!-- 2. TUNER -->
+      <section class="view-panel" id="view-tuner">
+        <div class="g-card">
+          <div class="g-card-header">
+            <div>
+              <div class="g-card-title">Afinador Cromático DSP</div>
+              <div class="g-card-subtitle">Detecção por autocorrelação em tempo real (Microfone ou Oscilador)</div>
+            </div>
+            <button class="btn btn-primary" id="tuner-mic-toggle" onclick="toggleTunerMic()">Ativar Microfone</button>
+          </div>
+
+          <div class="tuner-display">
+            <div class="tuner-note-hero" id="tuner-note-out">--</div>
+            <div class="tuner-freq" id="tuner-freq-out">--- Hz</div>
+            <div class="tuner-meter-track">
+              <div class="tuner-meter-center"></div>
+              <div class="tuner-needle" id="tuner-needle-el"></div>
+            </div>
+            <div class="tuner-cents-readout" id="tuner-cents-out">Desvio: 0.0 cents</div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 8px;">CALIBRAÇÃO A4</label>
+              <select class="input-control" id="tuner-ref-pitch" onchange="updateTunerRef()">
+                <option value="440">A4 = 440 Hz (Padrão Internacional)</option>
+                <option value="442">A4 = 442 Hz (Orquestral)</option>
+                <option value="432">A4 = 432 Hz (Frequência Harmônica)</option>
+                <option value="445">A4 = 445 Hz (Bright)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 8px;">GERADOR DE NOTAS DE REFERÊNCIA</label>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <button class="btn btn-sm" onclick="triggerSynthTone(261.63, 'sine')">C4</button>
+                <button class="btn btn-sm" onclick="triggerSynthTone(293.66, 'sine')">D4</button>
+                <button class="btn btn-sm" onclick="triggerSynthTone(329.63, 'sine')">E4</button>
+                <button class="btn btn-sm" onclick="triggerSynthTone(349.23, 'sine')">F4</button>
+                <button class="btn btn-sm" onclick="triggerSynthTone(392.00, 'sine')">G4</button>
+                <button class="btn btn-sm" onclick="triggerSynthTone(440.00, 'sine')">A4</button>
+                <button class="btn btn-sm" onclick="triggerSynthTone(493.88, 'sine')">B4</button>
+                <button class="btn btn-sm" onclick="triggerSynthTone(523.25, 'sine')">C5</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. PARAMETRIC EQ -->
+      <section class="view-panel" id="view-eq">
+        <div class="g-card">
+          <div class="g-card-header">
+            <div>
+              <div class="g-card-title">Equalizador Paramétrico de 4 Bandas</div>
+              <div class="g-card-subtitle">Curva de resposta em magnitude com filtros Biquad analógicos</div>
+            </div>
+            <button class="btn btn-sm" onclick="resetEqParams()">Resetar Curva</button>
+          </div>
+
+          <div class="eq-canvas-container">
+            <canvas id="eq-curve-canvas"></canvas>
+          </div>
+
+          <div class="grid-2">
+            <div class="g-card" style="margin-bottom: 0; background: var(--bg-surface-raised);">
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--emerald-400); margin-bottom: 12px;">BANDA 1 · LOW SHELF (80 Hz)</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
+                <span>Ganho:</span><span id="eq-g1-val" style="color: var(--emerald-400); font-family: var(--font-mono);">+2.0 dB</span>
+              </div>
+              <input type="range" class="range-slider" min="-12" max="12" step="0.5" value="2" id="eq-g1" oninput="updateEqBand(1, this.value)">
+            </div>
+
+            <div class="g-card" style="margin-bottom: 0; background: var(--bg-surface-raised);">
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--emerald-400); margin-bottom: 12px;">BANDA 2 · LOW-MID PEAK (450 Hz)</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
+                <span>Ganho:</span><span id="eq-g2-val" style="color: var(--emerald-400); font-family: var(--font-mono);">-1.5 dB</span>
+              </div>
+              <input type="range" class="range-slider" min="-12" max="12" step="0.5" value="-1.5" id="eq-g2" oninput="updateEqBand(2, this.value)">
+            </div>
+
+            <div class="g-card" style="margin-bottom: 0; background: var(--bg-surface-raised);">
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--emerald-400); margin-bottom: 12px;">BANDA 3 · HIGH-MID PEAK (2.8 kHz)</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
+                <span>Ganho:</span><span id="eq-g3-val" style="color: var(--emerald-400); font-family: var(--font-mono);">+1.0 dB</span>
+              </div>
+              <input type="range" class="range-slider" min="-12" max="12" step="0.5" value="1" id="eq-g3" oninput="updateEqBand(3, this.value)">
+            </div>
+
+            <div class="g-card" style="margin-bottom: 0; background: var(--bg-surface-raised);">
+              <div style="font-weight: 700; font-size: 0.88rem; color: var(--emerald-400); margin-bottom: 12px;">BANDA 4 · HIGH SHELF (11 kHz)</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px;">
+                <span>Ganho:</span><span id="eq-g4-val" style="color: var(--emerald-400); font-family: var(--font-mono);">+2.5 dB</span>
+              </div>
+              <input type="range" class="range-slider" min="-12" max="12" step="0.5" value="2.5" id="eq-g4" oninput="updateEqBand(4, this.value)">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MASTERING RACK -->
+      <section class="view-panel" id="view-mastering">
+        <div class="hero-banner" style="padding: 24px 30px; margin-bottom: 20px;">
+          <span class="hero-tag">A GEMA #1 · MASTERIZAÇÃO</span>
+          <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">Processamento Belentani para Duck</h2>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 4px;">Cadeia de masterização com compressão multibanda, compensação de transientes e limitação brickwall para streaming (Spotify, Apple Music, Tidal).</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="g-card">
+            <div class="g-card-header">
+              <div class="g-card-title">Parâmetros de Loudness & Ceiling</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 18px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px;">
+                  <span>Loudness Target:</span>
+                  <span id="target-lufs-val" style="color: var(--emerald-400); font-family: var(--font-mono); font-weight: 700;">-14.0 LUFS</span>
+                </div>
+                <input type="range" class="range-slider" min="-18" max="-8" step="0.5" value="-14" oninput="document.getElementById('target-lufs-val').textContent = this.value + ' LUFS'">
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px;">
+                  <span>True Peak Ceiling:</span>
+                  <span id="target-ceil-val" style="color: var(--emerald-400); font-family: var(--font-mono); font-weight: 700;">-0.3 dBFS</span>
+                </div>
+                <input type="range" class="range-slider" min="-3" max="0" step="0.1" value="-0.3" oninput="document.getElementById('target-ceil-val').textContent = this.value + ' dBFS'">
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 6px;">
+                  <span>Stereo Width Multiplier:</span>
+                  <span id="target-width-val" style="color: var(--emerald-400); font-family: var(--font-mono); font-weight: 700;">115%</span>
+                </div>
+                <input type="range" class="range-slider" min="80" max="150" step="1" value="115" oninput="document.getElementById('target-width-val').textContent = this.value + '%'">
+              </div>
+            </div>
+          </div>
+
+          <div class="g-card">
+            <div class="g-card-header">
+              <div class="g-card-title">Formatos de Entrega Master</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="track-row" onclick="notifyToast('WAV 24bit/48kHz Master Ativo')">
+                <div class="nav-icon">◈</div>
+                <div class="track-meta"><h4>WAV 24-bit / 48 kHz</h4><span>Master Lossless para Distribuição Oficial</span></div>
+                <span class="genre-badge">STUDIO</span>
+              </div>
+              <div class="track-row" onclick="notifyToast('Apple Digital Masters Configurado')">
+                <div class="nav-icon"></div>
+                <div class="track-meta"><h4>Apple Digital Masters</h4><span>Calibração certificada -16 LUFS</span></div>
+                <span class="genre-badge">ADM</span>
+              </div>
+              <div class="track-row" onclick="notifyToast('MP3 320kbps Pre-listen Exportado')">
+                <div class="nav-icon">♪</div>
+                <div class="track-meta"><h4>MP3 320 kbps CBR</h4><span>Aprovação rápida e prévia para clientes</span></div>
+                <span class="genre-badge">PREVIEW</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DUCK PLAYER -->
+      <section class="view-panel" id="view-player">
+        <div class="g-card" style="text-align: center; padding: 32px 24px;">
+          <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, var(--g-green-700), #06110a); border: 2px solid var(--border-active); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 800; color: var(--emerald-400); box-shadow: 0 0 40px rgba(16, 185, 129, 0.35);" id="player-vinyl-disc">D</div>
+          <h2 style="font-size: 1.4rem; font-weight: 800;" id="player-active-title">Noite Eterna</h2>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;" id="player-active-meta">Duck ft. Luna · TRAP · 140 BPM</p>
+
+          <div style="max-width: 480px; margin: 24px auto 20px;">
+            <div class="eq-canvas-container" style="height: 90px; margin-bottom: 12px; cursor: pointer;" onclick="toggleAudioPlayback()">
+              <canvas id="player-waveform-canvas"></canvas>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
+              <button class="btn btn-icon" onclick="playerStep(-1)">◀◀</button>
+              <button class="btn btn-primary btn-icon" style="width: 52px; height: 52px; font-size: 1.3rem;" id="player-play-btn" onclick="toggleAudioPlayback()">▶</button>
+              <button class="btn btn-icon" onclick="playerStep(1)">▶▶</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="g-card">
+          <div class="g-card-header">
+            <div class="g-card-title">Fila de Beats & Produções Duck</div>
+            <span class="header-badge" id="player-queue-count">16 Faixas Catalogadas</span>
+          </div>
+          <div id="player-full-queue"></div>
+        </div>
+      </section>
+
+      <!-- 6. PLUGINS ARSENAL -->
+      <section class="view-panel" id="view-plugins">
+        <div class="g-card">
+          <div class="g-card-header">
+            <div>
+              <div class="g-card-title">Arsenal de Plugins & Cadeias de Processamento</div>
+              <div class="g-card-subtitle">Instrumentos e processadores de sinal integrados ao fluxo Duck</div>
+            </div>
+            <input type="text" class="input-control" style="width: 240px;" placeholder="Filtrar plugins..." id="plugin-search-input" oninput="filterPluginList()">
+          </div>
+          <div class="grid-3" id="plugins-grid-root"></div>
+        </div>
+      </section>
+
+      <!-- 7. LOGO GENERATOR -->
+      <section class="view-panel" id="view-logo">
+        <div class="g-card">
+          <div class="g-card-header">
+            <div>
+              <div class="g-card-title">Gerador de Logos & Insígnias Duck</div>
+              <div class="g-card-subtitle">Renderizador canvas de alta resolução com estética Emerald Google</div>
+            </div>
+            <button class="btn btn-primary" onclick="exportLogoPng()">Exportar PNG HD</button>
+          </div>
+
+          <div class="logo-canvas-preview" id="logo-preview-box">DUCK</div>
+
+          <div class="grid-2" style="max-width: 700px; margin: 0 auto;">
+            <div>
+              <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px;">TEXTO DO LOGO</label>
+              <input type="text" class="input-control" value="DUCK" id="logo-text-input" oninput="renderLogoPreview()">
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px;">ESTILO VISUAL</label>
+              <select class="input-control" id="logo-style-select" onchange="renderLogoPreview()">
+                <option value="emerald">Google Emerald Glow</option>
+                <option value="minimal">Minimal Bold</option>
+                <option value="jade">Deep Jade Matrix</option>
+                <option value="gema">A Gema Special Edition</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. PORTFOLIO -->
+      <section class="view-panel" id="view-portfolio">
+        <div class="g-card">
+          <div class="g-card-header">
+            <div>
+              <div class="g-card-title">Discografia & Portfólio de Produção</div>
+              <div class="g-card-subtitle">Catálogo de faixas, singles e EPs finalizados</div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm" onclick="filterGenre('ALL')">Todos</button>
+              <button class="btn btn-sm" onclick="filterGenre('TRAP')">Trap</button>
+              <button class="btn btn-sm" onclick="filterGenre('HIPHOP')">Hip-Hop</button>
+              <button class="btn btn-sm" onclick="filterGenre('POP')">Pop</button>
+              <button class="btn btn-sm" onclick="filterGenre('R&B')">R&B</button>
+            </div>
+          </div>
+          <div id="portfolio-tracks-container"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <div>DUCK STUDIO TOOLKIT · A GEMA #1 (v3.2.0)</div>
+      <div>Arquitetura de Som & Masterização por <strong style="color: var(--emerald-400);">belentani</strong></div>
+      <div>CANAL ZION · 2026</div>
+    </footer>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   DUCK STUDIO TOOLKIT — CORE DSP & AUDIO SYNTHESIS ENGINE
+   Developed & Architected by belentani
+   Google Material Emerald UX/UI Engine
+   ========================================================================== */
+
+(function() {
+  'use strict';
+
+  // --- CATALOG DATA ---
+  const TRACKS = [
+    { n: 'Noite Eterna', a: 'Duck ft. Luna', g: 'TRAP', bpm: 140, baseFreq: 55 },
+    { n: 'Fogo Interior', a: 'Duck', g: 'HIPHOP', bpm: 90, baseFreq: 65 },
+    { n: 'Neon Dreams', a: 'Duck & Zay', g: 'POP', bpm: 128, baseFreq: 73 },
+    { n: 'Código Verde', a: 'Duck', g: 'TRAP', bpm: 145, baseFreq: 49 },
+    { n: 'Pulso Urbano', a: 'Duck ft. MC Flow', g: 'HIPHOP', bpm: 95, baseFreq: 61 },
+    { n: 'Cristal Líquido', a: 'Duck & Nina', g: 'R&B', bpm: 85, baseFreq: 69 },
+    { n: 'Som da Rua', a: 'Duck', g: 'TRAP', bpm: 150, baseFreq: 52 },
+    { n: 'Aurora Boreal', a: 'Duck', g: 'POP', bpm: 120, baseFreq: 65 },
+    { n: 'Terreno Sagrado', a: 'Duck ft. Zay', g: 'HIPHOP', bpm: 88, baseFreq: 58 },
+    { n: 'Gema Bruta', a: 'Duck', g: 'TRAP', bpm: 135, baseFreq: 55 },
+    { n: 'Eclipse', a: 'Duck & Luna', g: 'R&B', bpm: 92, baseFreq: 73 },
+    { n: 'Frequência Máxima', a: 'Duck', g: 'POP', bpm: 132, baseFreq: 65 },
+    { n: 'Bassa Profunda', a: 'Duck', g: 'TRAP', bpm: 155, baseFreq: 43 },
+    { n: 'Reflexos', a: 'Duck ft. Nina', g: 'R&B', bpm: 80, baseFreq: 61 },
+    { n: 'Cinco Estrelas', a: 'Duck', g: 'HIPHOP', bpm: 100, baseFreq: 58 },
+    { n: 'Matrix Verde', a: 'Duck', g: 'TRAP', bpm: 142, baseFreq: 49 }
+  ];
+
+  const PLUGINS = [
+    { n: 'FabFilter Pro-Q 3', cat: 'Equalizador Cirúrgico', tag: 'ESSENCIAL' },
+    { n: 'Waves SSL G-Master', cat: 'Compressor de Barramento', tag: 'PRO' },
+    { n: 'iZotope Ozone 11 Advanced', cat: 'Suíte de Masterização', tag: 'ESSENCIAL' },
+    { n: 'FabFilter Pro-L 2', cat: 'Limitador True Peak', tag: 'ESSENCIAL' },
+    { n: 'Soundtoys Decapitator', cat: 'Saturação Analógica', tag: 'PRO' },
+    { n: 'UAD Neve 1073 Preamp', cat: 'Pré-Amplificador Vintage', tag: 'PRO' },
+    { n: 'Valhalla VintageVerb', cat: 'Reverb Espacial', tag: 'ESSENCIAL' },
+    { n: 'Soundtoys EchoBoy', cat: 'Delay de Fita Analógico', tag: 'PRO' },
+    { n: 'FabFilter Saturn 2', cat: 'Distorção Multibanda', tag: 'PRO' },
+    { n: 'UAD 1176LN Peak Limiter', cat: 'Compressor FET Rápido', tag: 'ESSENCIAL' },
+    { n: 'Waves CLA-76', cat: 'Compressor Vocal Clássico', tag: 'PRO' },
+    { n: 'Auto-Tune Pro X', cat: 'Afinação Vocal em Tempo Real', tag: 'ESSENCIAL' },
+    { n: 'Spectrasonics Omnisphere 2', cat: 'Sintetizador Flagship', tag: 'VST' },
+    { n: 'Xfer Serum', cat: 'Sintetizador Wavetable', tag: 'VST' },
+    { n: 'Native Instruments Kontakt 7', cat: 'Sampler de Alta Fidelidade', tag: 'VST' },
+    { n: 'XLN Audio RC-20 Retro Color', cat: 'Textura & Ruído Vintage', tag: 'PRO' }
+  ];
+
+  // --- AUDIO CONTEXT & NODES ---
+  let audioCtx = null;
+  let masterGain = null;
+  let masterAnalyser = null;
+  let synthGain = null;
+  let eqFilters = [];
+  let isPlayingBeat = false;
+  let currentTrackIdx = 0;
+  let beatTimer = null;
+  let tunerStream = null;
+  let tunerAnalyser = null;
+  let isTunerListening = false;
+  let brandClickCounter = 0;
+
+  function initAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextClass();
+      
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.8;
+
+      masterAnalyser = audioCtx.createAnalyser();
+      masterAnalyser.fftSize = 1024;
+
+      // 4-Band Parametric EQ Filters
+      const f1 = audioCtx.createBiquadFilter(); f1.type = 'lowshelf'; f1.frequency.value = 80; f1.gain.value = 2;
+      const f2 = audioCtx.createBiquadFilter(); f2.type = 'peaking'; f2.frequency.value = 450; f2.Q.value = 1.2; f2.gain.value = -1.5;
+      const f3 = audioCtx.createBiquadFilter(); f3.type = 'peaking'; f3.frequency.value = 2800; f3.Q.value = 1.0; f3.gain.value = 1;
+      const f4 = audioCtx.createBiquadFilter(); f4.type = 'highshelf'; f4.frequency.value = 11000; f4.gain.value = 2.5;
+      
+      eqFilters = [f1, f2, f3, f4];
+
+      // Connect Chain: f1 -> f2 -> f3 -> f4 -> masterGain -> masterAnalyser -> destination
+      f1.connect(f2);
+      f2.connect(f3);
+      f3.connect(f4);
+      f4.connect(masterGain);
+      masterGain.connect(masterAnalyser);
+      masterAnalyser.connect(audioCtx.destination);
+
+      console.log('%c[DUCK ZION]%c Web Audio Engine Inicializado · Masterização por belentani', 'color:#10b981;font-weight:bold;', 'color:#9cb8a7;');
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // --- REAL SYNTHESIS TONE GENERATOR ---
+  window.triggerSynthTone = function(freq, type = 'sine', duration = 0.8) {
+    initAudioContext();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    
+    // ADSR Envelope
+    const now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.35, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.2, now + 0.2);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(gain);
+    gain.connect(eqFilters[0]);
+
+    osc.start(now);
+    osc.stop(now + duration + 0.05);
+
+    notifyToast(`Sintetizador: Tom ${freq.toFixed(1)} Hz (${type})`);
+  };
+
+  // --- SYNTHESIZED DRUM & BASS BEAT ENGINE ---
+  function playSynthesizedBeatPattern(step) {
+    if (!audioCtx || !isPlayingBeat) return;
+    const now = audioCtx.currentTime;
+    const t = TRACKS[currentTrackIdx];
+    const baseF = t.baseFreq || 55;
+
+    // Kick / 808 Sub on steps 0, 4, 8, 12
+    if (step % 4 === 0) {
+      const kickOsc = audioCtx.createOscillator();
+      const kickGain = audioCtx.createGain();
+      kickOsc.frequency.setValueAtTime(140, now);
+      kickOsc.frequency.exponentialRampToValueAtTime(baseF, now + 0.08);
+      kickGain.gain.setValueAtTime(0.7, now);
+      kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      kickOsc.connect(kickGain);
+      kickGain.connect(eqFilters[0]);
+      kickOsc.start(now);
+      kickOsc.stop(now + 0.36);
+    }
+
+    // Snare / Clap on steps 4, 12
+    if (step === 4 || step === 12) {
+      const snareOsc = audioCtx.createOscillator();
+      const snareGain = audioCtx.createGain();
+      snareOsc.type = 'triangle';
+      snareOsc.frequency.setValueAtTime(220, now);
+      snareOsc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+      snareGain.gain.setValueAtTime(0.4, now);
+      snareGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      snareOsc.connect(snareGain);
+      snareGain.connect(eqFilters[0]);
+      snareOsc.start(now);
+      snareOsc.stop(now + 0.19);
+    }
+
+    // Hi-Hat on every 2 steps
+    if (step % 2 === 0) {
+      const hatOsc = audioCtx.createOscillator();
+      const hatGain = audioCtx.createGain();
+      hatOsc.type = 'sawtooth';
+      hatOsc.frequency.setValueAtTime(8000, now);
+      hatGain.gain.setValueAtTime(0.08, now);
+      hatGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+      hatOsc.connect(hatGain);
+      hatGain.connect(eqFilters[0]);
+      hatOsc.start(now);
+      hatOsc.stop(now + 0.05);
+    }
+  }
+
+  window.toggleAudioPlayback = function() {
+    initAudioContext();
+    isPlayingBeat = !isPlayingBeat;
+    const playBtn = document.getElementById('player-play-btn');
+    const vinyl = document.getElementById('player-vinyl-disc');
+
+    if (isPlayingBeat) {
+      playBtn.textContent = '❚❚';
+      vinyl.style.animation = 'pulse-gem 1.2s infinite ease-in-out';
+      notifyToast(`Reproduzindo Beat: ${TRACKS[currentTrackIdx].n}`);
+      let currentStep = 0;
+      const bpm = TRACKS[currentTrackIdx].bpm;
+      const stepIntervalMs = (60000 / bpm) / 4; // 16th notes
+      
+      beatTimer = setInterval(() => {
+        playSynthesizedBeatPattern(currentStep);
+        currentStep = (currentStep + 1) % 16;
+      }, stepIntervalMs);
+    } else {
+      playBtn.textContent = '▶';
+      vinyl.style.animation = 'none';
+      if (beatTimer) clearInterval(beatTimer);
+      notifyToast('Reprodução pausada');
+    }
+    renderTrackLists();
+  };
+
+  window.playerStep = function(direction) {
+    currentTrackIdx = (currentTrackIdx + direction + TRACKS.length) % TRACKS.length;
+    updateActivePlayerTrackUI();
+    if (isPlayingBeat) {
+      if (beatTimer) clearInterval(beatTimer);
+      window.toggleAudioPlayback(); // pause
+      window.toggleAudioPlayback(); // restart with new BPM
+    }
+  };
+
+  function updateActivePlayerTrackUI() {
+    const t = TRACKS[currentTrackIdx];
+    document.getElementById('player-active-title').textContent = t.n;
+    document.getElementById('player-active-meta').textContent = `${t.a} · ${t.g} · ${t.bpm} BPM`;
+    renderTrackLists();
+  }
+
+  // --- EQUALIZER PARAMETERS ---
+  window.updateEqBand = function(bandIndex, gainVal) {
+    initAudioContext();
+    const val = parseFloat(gainVal);
+    document.getElementById(`eq-g${bandIndex}-val`).textContent = `${val >= 0 ? '+' : ''}${val.toFixed(1)} dB`;
+    if (eqFilters[bandIndex - 1]) {
+      eqFilters[bandIndex - 1].gain.setValueAtTime(val, audioCtx.currentTime);
+    }
+    drawEqCurve();
+  };
+
+  window.resetEqParams = function() {
+    [2, -1.5, 1, 2.5].forEach((g, i) => {
+      document.getElementById(`eq-g${i+1}`).value = g;
+      window.updateEqBand(i + 1, g);
+    });
+    notifyToast('Curva de EQ restaurada para o preset Belentani');
+  };
+
+  // --- CHROMATIC TUNER (AUTOCORRELATION DSP) ---
+  const NOTE_STRINGS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  
+  function autoCorrelate(buffer, sampleRate) {
+    let SIZE = buffer.length;
+    let sumOfSquares = 0;
+    for (let i = 0; i < SIZE; i++) {
+      const val = buffer[i];
+      sumOfSquares += val * val;
+    }
+    const rootMeanSquare = Math.sqrt(sumOfSquares / SIZE);
+    if (rootMeanSquare < 0.01) return -1; // Not enough signal
+
+    let r1 = 0, r2 = SIZE - 1, threshold = 0.2;
+    for (let i = 0; i < SIZE / 2; i++) {
+      if (Math.abs(buffer[i]) < threshold) { r1 = i; break; }
+    }
+    for (let i = 1; i < SIZE / 2; i++) {
+      if (Math.abs(buffer[SIZE - i]) < threshold) { r2 = SIZE - i; break; }
+    }
+
+    buffer = buffer.slice(r1, r2);
+    SIZE = buffer.length;
+
+    const c = new Array(SIZE).fill(0);
+    for (let i = 0; i < SIZE; i++) {
+      for (let j = 0; j < SIZE - i; j++) {
+        c[i] = c[i] + buffer[j] * buffer[j + i];
+      }
+    }
+
+    let d = 0;
+    while (c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < SIZE; i++) {
+      if (c[i] > maxval) {
+        maxval = c[i];
+        maxpos = i;
+      }
+    }
+    let T0 = maxpos;
+    return sampleRate / T0;
+  }
+
+  function noteFromPitch(frequency) {
+    const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+    return Math.round(noteNum) + 69;
+  }
+
+  function frequencyFromNoteNumber(note) {
+    return 440 * Math.pow(2, (note - 69) / 12);
+  }
+
+  function centsOffFromPitch(frequency, note) {
+    return Math.floor(1200 * Math.log(frequency / frequencyFromNoteNumber(note)) / Math.log(2));
+  }
+
+  window.toggleTunerMic = async function() {
+    initAudioContext();
+    const btn = document.getElementById('tuner-mic-toggle');
+    if (!isTunerListening) {
+      try {
+        tunerStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const micSource = audioCtx.createMediaStreamSource(tunerStream);
+        tunerAnalyser = audioCtx.createAnalyser();
+        tunerAnalyser.fftSize = 2048;
+        micSource.connect(tunerAnalyser);
+        isTunerListening = true;
+        btn.textContent = 'Desativar Microfone';
+        btn.classList.add('btn-primary');
+        notifyToast('Microfone ativo: analisando afinação cromática...');
+        listenTunerPitch();
+      } catch (err) {
+        notifyToast('Permissão de microfone negada ou indisponível.');
+      }
+    } else {
+      if (tunerStream) tunerStream.getTracks().forEach(t => t.stop());
+      isTunerListening = false;
+      btn.textContent = 'Ativar Microfone';
+      btn.classList.remove('btn-primary');
+      document.getElementById('tuner-note-out').textContent = '--';
+      document.getElementById('tuner-freq-out').textContent = '--- Hz';
+      document.getElementById('tuner-needle-el').style.left = '50%';
+      notifyToast('Microfone desativado.');
+    }
+  };
+
+  function listenTunerPitch() {
+    if (!isTunerListening || !tunerAnalyser) return;
+    const buf = new Float32Array(2048);
+    tunerAnalyser.getFloatTimeDomainData(buf);
+    const pitch = autoCorrelate(buf, audioCtx.sampleRate);
+
+    const noteEl = document.getElementById('tuner-note-out');
+    const freqEl = document.getElementById('tuner-freq-out');
+    const centsEl = document.getElementById('tuner-cents-out');
+    const needleEl = document.getElementById('tuner-needle-el');
+
+    if (pitch !== -1 && pitch > 30 && pitch < 2000) {
+      const noteNumber = noteFromPitch(pitch);
+      const noteName = NOTE_STRINGS[noteNumber % 12];
+      const octave = Math.floor(noteNumber / 12) - 1;
+      const cents = centsOffFromPitch(pitch, noteNumber);
+
+      noteEl.textContent = `${noteName}${octave}`;
+      freqEl.textContent = `${pitch.toFixed(1)} Hz`;
+      centsEl.textContent = `Desvio: ${cents > 0 ? '+' : ''}${cents} cents`;
+
+      const clampedCents = Math.max(-50, Math.min(50, cents));
+      const leftPercent = 50 + (clampedCents / 50) * 45;
+      needleEl.style.left = `${leftPercent}%`;
+
+      if (Math.abs(cents) <= 4) {
+        noteEl.classList.add('in-tune');
+      } else {
+        noteEl.classList.remove('in-tune');
+      }
+    }
+    requestAnimationFrame(listenTunerPitch);
+  }
+
+  // --- NAVIGATION ROUTING ---
+  const PAGE_TITLES = {
+    dashboard: 'Command Center',
+    tuner: 'Afinador Cromático DSP',
+    eq: 'Equalizador Paramétrico 4-Band',
+    mastering: 'Mastering Rack Belentani',
+    player: 'Duck Beats Player',
+    plugins: 'Arsenal de Plugins & VSTs',
+    logo: 'Gerador de Logos & Identidade',
+    portfolio: 'Discografia & Catálogo'
+  };
+
+  window.navigateTo = function(pageId) {
+    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    const targetPanel = document.getElementById(`view-${pageId}`);
+    if (targetPanel) targetPanel.classList.add('active');
+
+    const activeNav = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+    if (activeNav) activeNav.classList.add('active');
+
+    document.getElementById('page-heading').textContent = PAGE_TITLES[pageId] || pageId.toUpperCase();
+  };
+
+  // --- TOAST NOTIFIER ---
+  window.notifyToast = function(msg) {
+    const root = document.getElementById('toast-root');
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.innerHTML = `<span style="color:var(--emerald-400);font-size:1.1rem;">◈</span> <span>${msg}</span>`;
+    root.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(40px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 3200);
+  };
+
+  // --- LOGO GENERATOR ---
+  window.renderLogoPreview = function() {
+    const text = document.getElementById('logo-text-input').value || 'DUCK';
+    const style = document.getElementById('logo-style-select').value;
+    const box = document.getElementById('logo-preview-box');
+
+    box.textContent = text;
+    if (style === 'emerald') {
+      box.style.background = '#040806';
+      box.style.color = 'var(--emerald-400)';
+      box.style.textShadow = '0 0 25px rgba(16, 185, 129, 0.8)';
+      box.style.borderColor = 'var(--emerald-400)';
+    } else if (style === 'minimal') {
+      box.style.background = '#0d1511';
+      box.style.color = '#ffffff';
+      box.style.textShadow = 'none';
+      box.style.borderColor = 'rgba(255,255,255,0.2)';
+    } else if (style === 'jade') {
+      box.style.background = '#05140d';
+      box.style.color = 'var(--mint-glow)';
+      box.style.textShadow = '0 0 35px rgba(110, 231, 183, 0.9)';
+      box.style.borderColor = 'var(--mint-glow)';
+    } else if (style === 'gema') {
+      box.style.background = 'radial-gradient(circle, #0e291b 0%, #030805 100%)';
+      box.style.color = '#e8f5e9';
+      box.style.textShadow = '0 0 40px #10b981, 0 0 80px #059669';
+      box.style.borderColor = '#10b981';
+    }
+  };
+
+  window.exportLogoPng = function() {
+    const text = document.getElementById('logo-text-input').value || 'DUCK';
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 800;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#070d0a';
+    ctx.fillRect(0, 0, 800, 800);
+
+    // Emerald circle glow
+    const grad = ctx.createRadialGradient(400, 400, 50, 400, 400, 360);
+    grad.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+    grad.addColorStop(1, 'rgba(7, 13, 10, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 800, 800);
+
+    // Border ring
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(400, 400, 320, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Text
+    ctx.fillStyle = '#10b981';
+    ctx.shadowColor = '#10b981';
+    ctx.shadowBlur = 30;
+    ctx.font = 'bold 110px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 400, 380);
+
+    // Watermark
+    ctx.shadowBlur = 0;
+    ctx.font = '600 22px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#9cb8a7';
+    ctx.fillText('DUCK ZION · BELENTANI 2026', 400, 490);
+
+    const link = document.createElement('a');
+    link.download = `duck-logo-${text.toLowerCase()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    notifyToast('Logo HD exportado com sucesso!');
+  };
+
+  // --- RENDER TRACKS & PORTFOLIO ---
+  function renderTrackLists() {
+    const recentRoot = document.getElementById('dashboard-recent-tracks');
+    const queueRoot = document.getElementById('player-full-queue');
+    const portRoot = document.getElementById('portfolio-tracks-container');
+
+    if (recentRoot) {
+      recentRoot.innerHTML = TRACKS.slice(0, 4).map((t, idx) => `
+        <div class="track-row ${idx === currentTrackIdx ? 'playing' : ''}" onclick="selectTrack(${idx})">
+          <div class="track-idx">${String(idx + 1).padStart(2, '0')}</div>
+          <div class="track-meta"><h4>${t.n}</h4><span>${t.a}</span></div>
+          <div class="genre-badge">${t.g}</div>
+          <div class="track-bpm">${t.bpm} BPM</div>
+          <button class="btn btn-sm btn-icon">${idx === currentTrackIdx && isPlayingBeat ? '❚❚' : '▶'}</button>
+        </div>
+      `).join('');
+    }
+
+    if (queueRoot) {
+      queueRoot.innerHTML = TRACKS.map((t, idx) => `
+        <div class="track-row ${idx === currentTrackIdx ? 'playing' : ''}" onclick="selectTrack(${idx})">
+          <div class="track-idx">${String(idx + 1).padStart(2, '0')}</div>
+          <div class="track-meta"><h4>${t.n}</h4><span>${t.a}</span></div>
+          <div class="genre-badge">${t.g}</div>
+          <div class="track-bpm">${t.bpm} BPM</div>
+          <button class="btn btn-sm btn-icon">${idx === currentTrackIdx && isPlayingBeat ? '❚❚' : '▶'}</button>
+        </div>
+      `).join('');
+    }
+
+    if (portRoot) {
+      portRoot.innerHTML = TRACKS.map((t, idx) => `
+        <div class="track-row" onclick="selectTrack(${idx})">
+          <div class="track-idx">${String(idx + 1).padStart(2, '0')}</div>
+          <div class="track-meta"><h4>${t.n}</h4><span>${t.a}</span></div>
+          <div class="genre-badge">${t.g}</div>
+          <div class="track-bpm">${t.bpm} BPM</div>
+          <button class="btn btn-sm btn-icon">▶</button>
+        </div>
+      `).join('');
+    }
+  }
+
+  window.selectTrack = function(idx) {
+    currentTrackIdx = idx;
+    updateActivePlayerTrackUI();
+    if (!isPlayingBeat) {
+      window.toggleAudioPlayback();
+    } else {
+      if (beatTimer) clearInterval(beatTimer);
+      window.toggleAudioPlayback();
+      window.toggleAudioPlayback();
+    }
+  };
+
+  window.filterGenre = function(genre) {
+    const portRoot = document.getElementById('portfolio-tracks-container');
+    const filtered = genre === 'ALL' ? TRACKS : TRACKS.filter(t => t.g === genre);
+    portRoot.innerHTML = filtered.map((t, idx) => `
+      <div class="track-row" onclick="notifyToast('Reproduzindo: ${t.n}')">
+        <div class="track-idx">${String(idx + 1).padStart(2, '0')}</div>
+        <div class="track-meta"><h4>${t.n}</h4><span>${t.a}</span></div>
+        <div class="genre-badge">${t.g}</div>
+        <div class="track-bpm">${t.bpm} BPM</div>
+        <button class="btn btn-sm btn-icon">▶</button>
+      </div>
+    `).join('');
+    notifyToast(`Filtrado por gênero: ${genre}`);
+  };
+
+  // --- PLUGINS GRID ---
+  function renderPluginsGrid() {
+    const root = document.getElementById('plugins-grid-root');
+    if (!root) return;
+    root.innerHTML = PLUGINS.map(p => `
+      <div class="g-card" style="margin-bottom:0;background:var(--bg-surface-raised);cursor:pointer;" onclick="notifyToast('Preset carregado: ${p.n}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="genre-badge">${p.tag}</span>
+          <span style="color:var(--emerald-400);font-size:0.9rem;">⚙</span>
+        </div>
+        <div style="font-weight:700;font-size:0.92rem;color:var(--text-primary);">${p.n}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">${p.cat}</div>
+      </div>
+    `).join('');
+  }
+
+  window.filterPluginList = function() {
+    const q = document.getElementById('plugin-search-input').value.toLowerCase();
+    const filtered = PLUGINS.filter(p => p.n.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q));
+    const root = document.getElementById('plugins-grid-root');
+    root.innerHTML = filtered.map(p => `
+      <div class="g-card" style="margin-bottom:0;background:var(--bg-surface-raised);cursor:pointer;" onclick="notifyToast('Preset carregado: ${p.n}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="genre-badge">${p.tag}</span>
+          <span style="color:var(--emerald-400);font-size:0.9rem;">⚙</span>
+        </div>
+        <div style="font-weight:700;font-size:0.92rem;color:var(--text-primary);">${p.n}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">${p.cat}</div>
+      </div>
+    `).join('');
+  };
+
+  // --- CANVASES & VISUALIZERS ---
+  function initCanvases() {
+    // 1. Background Particle Field
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    resizeBg();
+    window.addEventListener('resize', resizeBg);
+
+    const particles = Array.from({ length: 45 }, () => ({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: Math.random() * 2 + 1
+    }));
+
+    function drawBg() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      bgCtx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+      bgCtx.strokeStyle = 'rgba(16, 185, 129, 0.05)';
+      bgCtx.lineWidth = 1;
+
+      particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > bgCanvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > bgCanvas.height) p.vy *= -1;
+
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        bgCtx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = p.x - particles[j].x;
+          const dy = p.y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 140) {
+            bgCtx.beginPath();
+            bgCtx.moveTo(p.x, p.y);
+            bgCtx.lineTo(particles[j].x, particles[j].y);
+            bgCtx.stroke();
+          }
+        }
+      });
+      requestAnimationFrame(drawBg);
+    }
+    drawBg();
+
+    // 2. Oscilloscope / Real FFT
+    const scopeCanvas = document.getElementById('scope-canvas');
+    const scopeCtx = scopeCanvas.getContext('2d');
+    function resizeScope() {
+      if (scopeCanvas.parentElement) {
+        scopeCanvas.width = scopeCanvas.parentElement.clientWidth;
+        scopeCanvas.height = scopeCanvas.parentElement.clientHeight;
+      }
+    }
+    resizeScope();
+    window.addEventListener('resize', resizeScope);
+
+    let phase = 0;
+    function drawScope() {
+      scopeCtx.fillStyle = 'rgba(5, 10, 7, 0.3)';
+      scopeCtx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+
+      scopeCtx.lineWidth = 2.5;
+      scopeCtx.strokeStyle = '#10b981';
+      scopeCtx.shadowColor = 'rgba(16, 185, 129, 0.6)';
+      scopeCtx.shadowBlur = 10;
+      scopeCtx.beginPath();
+
+      if (masterAnalyser && isPlayingBeat) {
+        const data = new Uint8Array(masterAnalyser.frequencyBinCount);
+        masterAnalyser.getByteTimeDomainData(data);
+        const sliceWidth = scopeCanvas.width / data.length;
+        let x = 0;
+        for (let i = 0; i < data.length; i++) {
+          const v = data[i] / 128.0;
+          const y = (v * scopeCanvas.height) / 2;
+          if (i === 0) scopeCtx.moveTo(x, y);
+          else scopeCtx.lineTo(x, y);
+          x += sliceWidth;
+        }
+      } else {
+        // Idle ambient subtle wave
+        for (let x = 0; x < scopeCanvas.width; x++) {
+          const y = scopeCanvas.height / 2 + Math.sin(x * 0.02 + phase) * 14 * Math.sin(x * 0.006 + phase * 0.4);
+          if (x === 0) scopeCtx.moveTo(x, y);
+          else scopeCtx.lineTo(x, y);
+        }
+        phase += 0.04;
+      }
+      scopeCtx.stroke();
+      scopeCtx.shadowBlur = 0;
+      requestAnimationFrame(drawScope);
+    }
+    drawScope();
+
+    // 3. Player Waveform
+    const pwCanvas = document.getElementById('player-waveform-canvas');
+    if (pwCanvas) {
+      const pwCtx = pwCanvas.getContext('2d');
+      function resizePw() {
+        if (pwCanvas.parentElement) {
+          pwCanvas.width = pwCanvas.parentElement.clientWidth;
+          pwCanvas.height = pwCanvas.parentElement.clientHeight;
+        }
+      }
+      resizePw();
+      window.addEventListener('resize', resizePw);
+
+      function drawPw() {
+        pwCtx.clearRect(0, 0, pwCanvas.width, pwCanvas.height);
+        const bars = 48;
+        const barW = pwCanvas.width / bars;
+        for (let i = 0; i < bars; i++) {
+          const h = isPlayingBeat
+            ? 10 + Math.sin(Date.now() * 0.008 + i * 0.3) * 25 + Math.random() * 15
+            : 8 + Math.sin(i * 0.2) * 12;
+          pwCtx.fillStyle = i <= (bars * 0.45) ? '#10b981' : 'rgba(16, 185, 129, 0.25)';
+          pwCtx.fillRect(i * barW + 2, (pwCanvas.height - h) / 2, barW - 4, h);
+        }
+        requestAnimationFrame(drawPw);
+      }
+      drawPw();
+    }
+
+    // 4. Equalizer Curve Canvas
+    drawEqCurve();
+  }
+
+  function drawEqCurve() {
+    const eqCanvas = document.getElementById('eq-curve-canvas');
+    if (!eqCanvas || !eqCanvas.parentElement) return;
+    eqCanvas.width = eqCanvas.parentElement.clientWidth;
+    eqCanvas.height = eqCanvas.parentElement.clientHeight;
+    const ctx = eqCanvas.getContext('2d');
+
+    ctx.clearRect(0, 0, eqCanvas.width, eqCanvas.height);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    [0.25, 0.5, 0.75].forEach(r => {
+      ctx.beginPath();
+      ctx.moveTo(0, eqCanvas.height * r);
+      ctx.lineTo(eqCanvas.width, eqCanvas.height * r);
+      ctx.stroke();
+    });
+
+    const g1 = parseFloat(document.getElementById('eq-g1')?.value || 2);
+    const g2 = parseFloat(document.getElementById('eq-g2')?.value || -1.5);
+    const g3 = parseFloat(document.getElementById('eq-g3')?.value || 1);
+    const g4 = parseFloat(document.getElementById('eq-g4')?.value || 2.5);
+
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+
+    const midY = eqCanvas.height / 2;
+    for (let x = 0; x < eqCanvas.width; x++) {
+      const normX = x / eqCanvas.width;
+      // Synthesize 4 band responses
+      const b1Impact = Math.exp(-Math.pow((normX - 0.1) * 6, 2)) * g1;
+      const b2Impact = Math.exp(-Math.pow((normX - 0.35) * 8, 2)) * g2;
+      const b3Impact = Math.exp(-Math.pow((normX - 0.65) * 8, 2)) * g3;
+      const b4Impact = Math.exp(-Math.pow((normX - 0.9) * 5, 2)) * g4;
+      const totalGain = b1Impact + b2Impact + b3Impact + b4Impact;
+
+      const y = midY - (totalGain * 6);
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // --- MULTIBAND METERS ---
+  function initMeters() {
+    const cluster = document.getElementById('master-meter-cluster');
+    if (!cluster) return;
+    cluster.innerHTML = '';
+    for (let i = 0; i < 14; i++) {
+      const band = document.createElement('div');
+      band.className = 'meter-band';
+      const fill = document.createElement('div');
+      fill.className = 'meter-band-fill';
+      fill.id = `meter-band-fill-${i}`;
+      band.appendChild(fill);
+      cluster.appendChild(band);
+    }
+
+    setInterval(() => {
+      for (let i = 0; i < 14; i++) {
+        const fill = document.getElementById(`meter-band-fill-${i}`);
+        if (!fill) continue;
+        let pct = 8;
+        if (isPlayingBeat) {
+          pct = 20 + Math.random() * 65 + Math.sin(Date.now() * 0.005 + i * 0.4) * 15;
+        } else {
+          pct = 6 + Math.sin(Date.now() * 0.002 + i) * 6;
+        }
+        fill.style.height = `${Math.max(4, Math.min(96, pct))}%`;
+      }
+    }, 80);
+  }
+
+  // --- STATS COUNTERS ---
+  function animateStats() {
+    document.querySelectorAll('[data-counter]').forEach(el => {
+      const target = parseInt(el.getAttribute('data-counter'));
+      let cur = 0;
+      const step = Math.max(1, Math.floor(target / 45));
+      const interval = setInterval(() => {
+        cur += step;
+        if (cur >= target) {
+          cur = target;
+          clearInterval(interval);
+        }
+        el.textContent = cur.toLocaleString('pt-BR');
+      }, 30);
+    });
+  }
+
+  // --- CLOCK ---
+  function initClock() {
+    const clockEl = document.getElementById('live-clock');
+    setInterval(() => {
+      clockEl.textContent = new Date().toLocaleTimeString('pt-BR');
+    }, 1000);
+  }
+
+  // --- EASTER EGGS & SECRET PANEL ---
+  window.onBrandClick = function() {
+    brandClickCounter++;
+    if (brandClickCounter === 3) {
+      toggleSecret();
+      brandClickCounter = 0;
+    } else {
+      notifyToast(`Duck Zion Engine · Masterização Belentani (${brandClickCounter}/3)`);
+    }
+  };
+
+  window.toggleSecret = function() {
+    const p = document.getElementById('secret-panel');
+    p.classList.toggle('open');
+  };
+
+  window.triggerSecretLab = function() {
+    toggleSecret();
+    notifyToast('Belentani Secret Lab Aberto!');
+  };
+
+  // --- LOADER TICK ---
+  const loaderMsgs = [
+    'Carregando motores de áudio DSP...',
+    'Calibrando afinador cromático YIN...',
+    'Inicializando equalizador paramétrico...',
+    'Carregando catálogo de produções...',
+    'Aplicando design Google Emerald Verde...',
+    'Duck Studio Toolkit Pronto · Belentani 2026'
+  ];
+  let loadStep = 0;
+  function tickLoader() {
+    const fill = document.getElementById('loader-bar');
+    const text = document.getElementById('loader-text');
+    if (loadStep < loaderMsgs.length) {
+      text.textContent = loaderMsgs[loadStep];
+      fill.style.width = `${((loadStep + 1) / loaderMsgs.length) * 100}%`;
+      loadStep++;
+      setTimeout(tickLoader, 240);
+    } else {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('app').classList.add('visible');
+        initCanvases();
+        initMeters();
+        renderTrackLists();
+        renderPluginsGrid();
+        animateStats();
+        initClock();
+      }, 300);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(tickLoader, 150);
+  });
+
+})();
+</script>
+</body>
+</html>

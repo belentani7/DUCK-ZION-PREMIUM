@@ -1,0 +1,1145 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { usePortalStore, type Client, type Project, type Invoice, type Message } from '@/lib/store';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
+import {
+  LayoutDashboard, FolderKanban, Receipt, MessageSquare, Users, ClipboardCheck,
+  LogOut, Menu, X, ChevronRight, Plus, Eye, ArrowLeft, Search, Send,
+  Sparkles, Shield, Clock, DollarSign, TrendingUp, AlertTriangle, CheckCircle2,
+  Loader2, Building2, Mail, Phone, CalendarDays
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
+import { StatusBadge } from '@/components/StatusBadge';
+import { DashboardCard } from '@/components/DashboardCard';
+import { MessageThread } from '@/components/MessageThread';
+import { CreateInvoiceForm } from '@/components/CreateInvoiceForm';
+import { ProjectDetail } from '@/components/ProjectDetail';
+import { InvoiceDetail } from '@/components/InvoiceDetail';
+
+// ============ API HELPER ============
+async function api(path: string, options?: RequestInit) {
+  const token = usePortalStore.getState().token;
+  const res = await fetch(path, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Error de servidor' }));
+    throw new Error(err.error || 'Error de servidor');
+  }
+  return res.json();
+}
+
+// ============ ANIMATION VARIANTS ============
+const pageVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.2 } },
+};
+
+const staggerContainer = {
+  animate: { transition: { staggerChildren: 0.06 } },
+};
+
+const staggerItem = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+};
+
+// ============ FORMAT HELPERS ============
+function formatCurrency(n: number) {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n);
+}
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function formatTime(d: string) {
+  return new Date(d).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+function timeAgo(d: string) {
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `hace ${mins}min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `hace ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `hace ${days}d`;
+}
+
+// ============ LOGIN/REGISTER VIEW ============
+function AuthView() {
+  const { authView, setAuthView, setToken, setUser, initSocket } = usePortalStore();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [company, setCompany] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const action = authView === 'login' ? 'login' : 'signup';
+      const body = authView === 'login'
+        ? { email, password }
+        : { email, password, fullName, company };
+      const data = await api(`/api/auth/${action}`, { method: 'POST', body: JSON.stringify(body) });
+      setToken(data.token);
+      setUser(data.user);
+      initSocket(data.user.id);
+      toast.success(authView === 'login' ? 'Bienvenido de vuelta' : 'Cuenta creada exitosamente');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <Card className="shadow-xl shadow-black/5 border-0 rounded-2xl overflow-hidden">
+          {/* Header gradient */}
+          <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 px-8 pt-8 pb-10 text-white">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <span className="text-lg font-bold tracking-tight">ClientPortal</span>
+            </div>
+            <h1 className="text-2xl font-bold mb-1">
+              {authView === 'login' ? 'Bienvenido de vuelta' : 'Crear cuenta'}
+            </h1>
+            <p className="text-emerald-100 text-sm">
+              {authView === 'login'
+                ? 'Inicia sesión para acceder a tu portal'
+                : 'Regístrate como cliente para comenzar'}
+            </p>
+          </div>
+
+          <CardContent className="p-8 pt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-rose-50 text-rose-700 px-4 py-2.5 rounded-lg text-sm border border-rose-200">
+                  {error}
+                </div>
+              )}
+
+              {authView === 'signup' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Nombre completo</Label>
+                    <Input id="fullName" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Tu nombre" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="company">Empresa</Label>
+                    <Input id="company" value={company} onChange={e => setCompany(e.target.value)} placeholder="Nombre de tu empresa" />
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
+              </div>
+
+              <Button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 rounded-xl font-semibold transition-all duration-200">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {authView === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              {authView === 'login' ? (
+                <>¿No tienes cuenta?{' '}
+                  <button onClick={() => { setAuthView('signup'); setError(''); }} className="text-emerald-600 font-medium hover:underline">
+                    Regístrate
+                  </button>
+                </>
+              ) : (
+                <>¿Ya tienes cuenta?{' '}
+                  <button onClick={() => { setAuthView('login'); setError(''); }} className="text-emerald-600 font-medium hover:underline">
+                    Inicia sesión
+                  </button>
+                </>
+              )}
+            </div>
+
+            <Separator className="my-5" />
+
+            <div className="bg-slate-50 rounded-xl p-4">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Cuentas de demostración:</p>
+              <div className="space-y-1.5 text-xs text-muted-foreground">
+                <p><span className="font-mono text-slate-600">admin@portal.com</span> / <span className="font-mono text-slate-600">Admin123!</span></p>
+                <p><span className="font-mono text-slate-600">maria@techcorp.com</span> / <span className="font-mono text-slate-600">Cliente123!</span></p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+}
+
+// ============ CLIENT DASHBOARD ============
+function ClientDashboardView() {
+  const { user, projects, invoices, messages, stats, setClientView, setSelectedProjectId, setSelectedInvoiceId } = usePortalStore();
+  const statValues = stats as Record<string, number>;
+  const recentMessages = messages.slice(-3).reverse();
+  const upcomingDeliverables = projects.flatMap(p => (p.deliverables || []).filter(d => d.status !== 'Approved')).slice(0, 5);
+
+  return (
+    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">¡Hola, {user?.fullName}!</h1>
+        <p className="text-muted-foreground mt-1">Aquí tienes un resumen de tu actividad</p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <DashboardCard title="Proyectos activos" value={statValues?.totalProjects || 0} icon={<FolderKanban className="w-5 h-5 text-emerald-600" />} />
+        <DashboardCard title="Entregables pendientes" value={statValues?.pendingDeliverables || 0} icon={<ClipboardCheck className="w-5 h-5 text-amber-600" />} />
+        <DashboardCard title="Facturas pendientes" value={statValues?.unpaidInvoices || 0} icon={<Receipt className="w-5 h-5 text-rose-600" />} description={formatCurrency(statValues?.totalOwed || 0)} />
+        <DashboardCard title="Mensajes nuevos" value={statValues?.unreadMessages || 0} icon={<MessageSquare className="w-5 h-5 text-violet-600" />} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Projects */}
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold">Proyectos recientes</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setClientView('projects')} className="text-emerald-600 hover:text-emerald-700">
+                Ver todos <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {projects.slice(0, 4).map(p => (
+                <motion.div key={p.id} variants={staggerItem}
+                  onClick={() => { setSelectedProjectId(p.id); setClientView('project-detail'); }}
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors group">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate group-hover:text-emerald-700 transition-colors">{p.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{p.client?.companyName || user?.company}</p>
+                  </div>
+                  <StatusBadge status={p.status} type="project" />
+                </motion.div>
+              ))}
+              {projects.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No hay proyectos</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Messages */}
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold">Mensajes recientes</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setClientView('messages')} className="text-emerald-600 hover:text-emerald-700">
+                Ver chat <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recentMessages.map(m => (
+                <div key={m.id} className="p-3 rounded-xl bg-slate-50">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-slate-600">{m.sender?.fullName}</span>
+                    <span className="text-xs text-muted-foreground">{timeAgo(m.createdAt)}</span>
+                  </div>
+                  <p className="text-sm text-slate-700 line-clamp-2">{m.content}</p>
+                </div>
+              ))}
+              {recentMessages.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No hay mensajes</p>}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Upcoming Deliverables */}
+      {upcomingDeliverables.length > 0 && (
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold">Entregables próximos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {upcomingDeliverables.map(d => {
+                const isOverdue = new Date(d.dueDate) < new Date() && d.status !== 'Approved';
+                return (
+                  <div key={d.id} className={`flex items-center justify-between p-3 rounded-xl ${isOverdue ? 'bg-rose-50 border border-rose-100' : 'bg-slate-50'}`}>
+                    <div>
+                      <p className="text-sm font-medium">{d.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{d.project?.title}</p>
+                    </div>
+                    <div className="text-right">
+                      <StatusBadge status={d.status} type="deliverable" />
+                      <p className={`text-xs mt-1 ${isOverdue ? 'text-rose-600 font-medium' : 'text-muted-foreground'}`}>
+                        <CalendarDays className="w-3 h-3 inline mr-1" />{formatDate(d.dueDate)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </motion.div>
+  );
+}
+
+// ============ PROJECTS LIST VIEW ============
+function ProjectsListView({ isAdmin }: { isAdmin: boolean }) {
+  const { projects, setSelectedProjectId, setAdminView, setClientView, user } = usePortalStore();
+  const navigate = (id: string) => {
+    setSelectedProjectId(id);
+    if (isAdmin) setAdminView('project-detail');
+    else setClientView('project-detail');
+  };
+
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Proyectos</h1>
+          <p className="text-muted-foreground mt-1">{projects.length} proyecto{projects.length !== 1 ? 's' : ''} en total</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {projects.map((p, i) => (
+          <motion.div key={p.id} variants={staggerItem} initial="initial" animate="animate" transition={{ delay: i * 0.05 }}>
+            <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl hover:shadow-xl hover:shadow-black/10 transition-all duration-300 cursor-pointer group h-full"
+              onClick={() => navigate(p.id)}>
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base font-semibold group-hover:text-emerald-700 transition-colors truncate">{p.title}</CardTitle>
+                    {!isAdmin && (
+                      <CardDescription className="mt-1">{p.description?.substring(0, 80)}...</CardDescription>
+                    )}
+                    {isAdmin && p.client && (
+                      <CardDescription className="mt-1">{p.client.companyName}</CardDescription>
+                    )}
+                  </div>
+                  <StatusBadge status={p.status} type="project" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                {p.deliverables && p.deliverables.length > 0 && (
+                  <div className="mb-3">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">Progreso de entregables</span>
+                      <span className="font-medium">{p.deliverables.filter(d => d.status === 'Approved').length}/{p.deliverables.length}</span>
+                    </div>
+                    <Progress value={(p.deliverables.filter(d => d.status === 'Approved').length / p.deliverables.length) * 100} className="h-2" />
+                  </div>
+                )}
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  {p.startDate && <span className="flex items-center gap-1"><CalendarDays className="w-3 h-3" />{formatDate(p.startDate)}</span>}
+                  {p.targetEndDate && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{formatDate(p.targetEndDate)}</span>}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+      {projects.length === 0 && (
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl p-12 text-center">
+          <FolderKanban className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+          <p className="text-muted-foreground">No hay proyectos disponibles</p>
+        </Card>
+      )}
+    </motion.div>
+  );
+}
+
+// ============ INVOICES LIST VIEW ============
+function InvoicesListView({ isAdmin }: { isAdmin: boolean }) {
+  const { invoices, setSelectedInvoiceId, setAdminView, setClientView } = usePortalStore();
+  const [filter, setFilter] = useState('all');
+  const filtered = filter === 'all' ? invoices : invoices.filter(i => i.status === filter);
+
+  const navigate = (id: string) => {
+    setSelectedInvoiceId(id);
+    if (isAdmin) setAdminView('invoice-detail');
+    else setClientView('invoice-detail');
+  };
+
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Facturas</h1>
+          <p className="text-muted-foreground mt-1">{invoices.length} factura{invoices.length !== 1 ? 's' : ''} en total</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              <SelectItem value="Draft">Borrador</SelectItem>
+              <SelectItem value="Sent">Enviada</SelectItem>
+              <SelectItem value="Paid">Pagada</SelectItem>
+              <SelectItem value="Overdue">Vencida</SelectItem>
+            </SelectContent>
+          </Select>
+          {isAdmin && (
+            <Button onClick={() => setAdminView('invoice-create')} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
+              <Plus className="w-4 h-4 mr-2" /> Nueva factura
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-slate-50/80">
+              <TableHead className="font-semibold">Número</TableHead>
+              {isAdmin && <TableHead className="font-semibold">Cliente</TableHead>}
+              <TableHead className="font-semibold">Fecha</TableHead>
+              <TableHead className="font-semibold">Vencimiento</TableHead>
+              <TableHead className="font-semibold">Estado</TableHead>
+              <TableHead className="font-semibold text-right">Importe</TableHead>
+              <TableHead className="font-semibold w-10"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map(inv => (
+              <TableRow key={inv.id} className="cursor-pointer hover:bg-slate-50/80 transition-colors" onClick={() => navigate(inv.id)}>
+                <TableCell className="font-mono font-medium text-sm">{inv.invoiceNumber}</TableCell>
+                {isAdmin && inv.client && <TableCell className="text-sm">{inv.client.companyName}</TableCell>}
+                <TableCell className="text-sm text-muted-foreground">{formatDate(inv.issueDate)}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{formatDate(inv.dueDate)}</TableCell>
+                <TableCell><StatusBadge status={inv.status} type="invoice" /></TableCell>
+                <TableCell className="text-right font-semibold">{formatCurrency(inv.totalAmount)}</TableCell>
+                <TableCell><Eye className="w-4 h-4 text-muted-foreground" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {filtered.length === 0 && (
+          <div className="py-12 text-center text-muted-foreground">
+            <Receipt className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+            <p>No hay facturas</p>
+          </div>
+        )}
+      </Card>
+    </motion.div>
+  );
+}
+
+// ============ MESSAGES VIEW ============
+function MessagesView() {
+  const { user, clients, selectedChatUserId, setSelectedChatUserId, setAdminView, setClientView } = usePortalStore();
+  const isAdmin = user?.role === 'admin';
+
+  const chatPartners = isAdmin
+    ? clients.map(c => ({ id: c.userId, name: c.user?.fullName || c.companyName, company: c.companyName }))
+    : [{ id: 'admin', name: 'Admin Principal', company: 'Mi Agencia' }];
+
+  // Auto-select first partner if none selected
+  const activePartner = chatPartners.find(p => p.id === selectedChatUserId) || chatPartners[0];
+
+  // Auto-set first partner on mount
+  useEffect(() => {
+    if (!selectedChatUserId && chatPartners.length > 0) {
+      setSelectedChatUserId(chatPartners[0].id);
+    }
+  }, [selectedChatUserId, chatPartners.length]);
+
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="h-[calc(100vh-5rem)] flex flex-col">
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-slate-900">Mensajes</h1>
+        <p className="text-muted-foreground mt-1">Comunicación directa con {isAdmin ? 'tus clientes' : 'el equipo'}</p>
+      </div>
+
+      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl flex-1 overflow-hidden flex">
+        {/* Contact list */}
+        <div className="w-64 border-r bg-slate-50/50 flex-shrink-0 hidden md:block">
+          <ScrollArea className="h-full">
+            <div className="p-3 space-y-1">
+              {chatPartners.map(partner => (
+                <button
+                  key={partner.id}
+                  onClick={() => setSelectedChatUserId(partner.id)}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                    selectedChatUserId === partner.id
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'hover:bg-slate-100 text-slate-700'
+                  }`}
+                >
+                  <Avatar className="w-9 h-9">
+                    <AvatarFallback className={selectedChatUserId === partner.id ? 'bg-emerald-200' : 'bg-slate-200'}>{partner.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{partner.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{partner.company}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Chat area */}
+        <div className="flex-1 flex flex-col">
+          {activePartner ? (
+            <MessageThread recipientId={activePartner.id} recipientName={activePartner.name} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-muted-foreground">
+              <p>Selecciona un contacto para chatear</p>
+            </div>
+          )}
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+// ============ ADMIN: CLIENTS LIST ============
+function AdminClientsView() {
+  const { clients, setSelectedClientId, setAdminView } = usePortalStore();
+  const [search, setSearch] = useState('');
+  const filtered = clients.filter(c =>
+    c.companyName.toLowerCase().includes(search.toLowerCase()) ||
+    c.user?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+    c.contactEmail.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Clientes</h1>
+          <p className="text-muted-foreground mt-1">{clients.length} cliente{clients.length !== 1 ? 's' : ''} registrados</p>
+        </div>
+      </div>
+
+      <div className="mb-4 relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input placeholder="Buscar clientes..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 rounded-xl" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filtered.map((c, i) => (
+          <motion.div key={c.id} variants={staggerItem} initial="initial" animate="animate" transition={{ delay: i * 0.05 }}>
+            <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl hover:shadow-xl hover:shadow-black/10 transition-all duration-300 cursor-pointer group"
+              onClick={() => { setSelectedClientId(c.id); setAdminView('client-detail'); }}>
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3">
+                  <Avatar className="w-11 h-11">
+                    <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold">
+                      {(c.user?.fullName || c.companyName).charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors truncate">{c.companyName}</h3>
+                    <p className="text-sm text-muted-foreground">{c.user?.fullName}</p>
+                  </div>
+                </div>
+                <Separator className="my-3" />
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="w-3.5 h-3.5" />
+                    <span className="truncate">{c.contactEmail}</span>
+                  </div>
+                  {c.phone && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>{c.phone}</span>
+                    </div>
+                  )}
+                  {c._count && (
+                    <div className="flex items-center gap-3 pt-2 text-xs">
+                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{c._count.projects} proyectos</span>
+                      <span className="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">{c._count.invoices} facturas</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+      {filtered.length === 0 && (
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl p-12 text-center">
+          <Users className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+          <p className="text-muted-foreground">No se encontraron clientes</p>
+        </Card>
+      )}
+    </motion.div>
+  );
+}
+
+// ============ ADMIN: CLIENT DETAIL ============
+function AdminClientDetailView() {
+  const { selectedClientId, setAdminView } = usePortalStore();
+  const [client, setClient] = useState<Client | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!selectedClientId) return;
+    let cancelled = false;
+    api(`/api/clients/${selectedClientId}`).then(data => {
+      if (!cancelled) { setClient(data); setLoading(false); }
+    }).catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [selectedClientId]);
+
+  if (loading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full" /></div>;
+  if (!client) return <p>Cliente no encontrado</p>;
+
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => setAdminView('clients')} className="text-muted-foreground">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Clientes
+        </Button>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        <h1 className="text-2xl font-bold text-slate-900">{client.companyName}</h1>
+      </div>
+
+      {/* Client Info Card */}
+      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <Avatar className="w-14 h-14">
+              <AvatarFallback className="bg-emerald-100 text-emerald-700 text-lg font-bold">
+                {(client.user?.fullName || client.companyName).charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold">{client.companyName}</h2>
+              <p className="text-muted-foreground">{client.user?.fullName} &middot; {client.user?.email}</p>
+            </div>
+          </div>
+          <Separator className="my-4" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-muted-foreground" />{client.contactEmail}</div>
+            {client.phone && <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-muted-foreground" />{client.phone}</div>}
+            {client.notes && <div className="text-muted-foreground italic">{client.notes}</div>}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Client Projects */}
+      {client.projects && client.projects.length > 0 && (
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+          <CardHeader><CardTitle className="text-lg font-semibold">Proyectos ({client.projects.length})</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {client.projects.map(p => (
+                <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+                  <div><p className="font-medium text-sm">{p.title}</p><p className="text-xs text-muted-foreground mt-0.5">{p.description?.substring(0, 60)}...</p></div>
+                  <StatusBadge status={p.status} type="project" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Client Invoices */}
+      {client.invoices && client.invoices.length > 0 && (
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+          <CardHeader><CardTitle className="text-lg font-semibold">Facturas ({client.invoices.length})</CardTitle></CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-50/80">
+                  <TableHead>Número</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Importe</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {client.invoices.map(inv => (
+                  <TableRow key={inv.id}>
+                    <TableCell className="font-mono text-sm">{inv.invoiceNumber}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{formatDate(inv.issueDate)}</TableCell>
+                    <TableCell><StatusBadge status={inv.status} type="invoice" /></TableCell>
+                    <TableCell className="text-right font-semibold">{formatCurrency(inv.totalAmount)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+    </motion.div>
+  );
+}
+
+// ============ ADMIN: DELIVERABLES VIEW ============
+function AdminDeliverablesView() {
+  const { projects } = usePortalStore();
+  const [deliverables, setDeliverables] = useState<import('@/lib/store').Deliverable[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    api('/api/deliverables').then(data => {
+      if (!cancelled) { setDeliverables(data); setLoading(false); }
+    }).catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (loading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 w-full" /></div>;
+
+  const pending = deliverables.filter(d => d.status === 'Pending');
+  const inReview = deliverables.filter(d => d.status === 'In Review');
+  const approved = deliverables.filter(d => d.status === 'Approved');
+  const rejected = deliverables.filter(d => d.status === 'Rejected');
+
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Entregables</h1>
+        <p className="text-muted-foreground mt-1">{deliverables.length} entregable{deliverables.length !== 1 ? 's' : ''} en total</p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <DashboardCard title="Pendientes" value={pending.length} icon={<Clock className="w-5 h-5 text-amber-600" />} />
+        <DashboardCard title="En revisión" value={inReview.length} icon={<Eye className="w-5 h-5 text-sky-600" />} />
+        <DashboardCard title="Aprobados" value={approved.length} icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />} />
+        <DashboardCard title="Rechazados" value={rejected.length} icon={<AlertTriangle className="w-5 h-5 text-rose-600" />} />
+      </div>
+
+      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-slate-50/80">
+              <TableHead>Entregable</TableHead>
+              <TableHead>Proyecto</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Vencimiento</TableHead>
+              <TableHead>Estado</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {deliverables.map(d => {
+              const isOverdue = new Date(d.dueDate) < new Date() && d.status !== 'Approved';
+              return (
+                <TableRow key={d.id} className={isOverdue ? 'bg-rose-50/50' : ''}>
+                  <TableCell className="font-medium text-sm">{d.title}</TableCell>
+                  <TableCell className="text-sm">{d.project?.title}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{d.project?.client?.companyName || '-'}</TableCell>
+                  <TableCell className={`text-sm ${isOverdue ? 'text-rose-600 font-medium' : 'text-muted-foreground'}`}>{formatDate(d.dueDate)}</TableCell>
+                  <TableCell><StatusBadge status={d.status} type="deliverable" /></TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Card>
+    </motion.div>
+  );
+}
+
+// ============ ADMIN: CREATE INVOICE VIEW ============
+function AdminCreateInvoiceView() {
+  const { setAdminView } = usePortalStore();
+  return (
+    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="sm" onClick={() => setAdminView('invoices')} className="text-muted-foreground">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Facturas
+        </Button>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        <h1 className="text-2xl font-bold text-slate-900">Nueva factura</h1>
+      </div>
+      <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+        <CardContent className="p-6">
+          <CreateInvoiceForm onSuccess={() => setAdminView('invoices')} />
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+// ============ ADMIN DASHBOARD ============
+function AdminDashboardView() {
+  const { clients, projects, invoices, stats } = usePortalStore();
+  const s = stats as Record<string, number>;
+  const invoicesByStatus = (stats as Record<string, unknown>).invoicesByStatus as { status: string; _count: number }[] || [];
+  const projectsByStatus = (stats as Record<string, unknown>).projectsByStatus as { status: string; _count: number }[] || [];
+
+  return (
+    <motion.div variants={staggerContainer} initial="initial" animate="animate" className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Panel de Administración</h1>
+        <p className="text-muted-foreground mt-1">Vista general de todos los proyectos y clientes</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <DashboardCard title="Clientes" value={s?.totalClients || 0} icon={<Users className="w-5 h-5 text-emerald-600" />} />
+        <DashboardCard title="Proyectos" value={s?.totalProjects || 0} icon={<FolderKanban className="w-5 h-5 text-amber-600" />} />
+        <DashboardCard title="Facturas pagadas" value={s?.totalInvoices || 0} icon={<DollarSign className="w-5 h-5 text-emerald-600" />} description={formatCurrency(s?.totalRevenue || 0)} />
+        <DashboardCard title="Entregables pendientes" value={s?.pendingDeliverables || 0} icon={<ClipboardCheck className="w-5 h-5 text-sky-600" />} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Projects by status */}
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+          <CardHeader><CardTitle className="text-lg font-semibold">Proyectos por estado</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {(['Discovery', 'In Progress', 'Review', 'Completed'] as const).map(status => {
+                const count = projectsByStatus.find(p => p.status === status)?._count || 0;
+                const total = projects.length || 1;
+                const pct = (count / total) * 100;
+                const colors: Record<string, string> = { 'Discovery': 'bg-amber-500', 'In Progress': 'bg-emerald-500', 'Review': 'bg-sky-500', 'Completed': 'bg-violet-500' };
+                return (
+                  <div key={status}>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="font-medium">{status}</span>
+                      <span className="text-muted-foreground">{count}</span>
+                    </div>
+                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${colors[status]} transition-all duration-500`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent invoices */}
+        <Card className="shadow-lg shadow-black/5 border-0 rounded-2xl">
+          <CardHeader><CardTitle className="text-lg font-semibold">Facturas recientes</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {invoices.slice(0, 5).map(inv => (
+                <div key={inv.id} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div>
+                    <p className="text-sm font-medium">{inv.invoiceNumber}</p>
+                    <p className="text-xs text-muted-foreground">{inv.client?.companyName}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold">{formatCurrency(inv.totalAmount)}</p>
+                    <StatusBadge status={inv.status} type="invoice" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {s?.overdueInvoices > 0 && (
+        <Card className="border-rose-200 bg-rose-50/50 rounded-2xl">
+          <CardContent className="p-4 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+            <p className="text-sm text-rose-800">Tienes <span className="font-bold">{s.overdueInvoices}</span> factura{s.overdueInvoices !== 1 ? 's' : ''} vencida{s.overdueInvoices !== 1 ? 's' : ''} que requieren atención.</p>
+          </CardContent>
+        </Card>
+      )}
+    </motion.div>
+  );
+}
+
+// ============ APP NAVIGATOR ============
+function AppNavigator() {
+  const { user, clientView, adminView, sidebarOpen, toggleSidebar, logout } = usePortalStore();
+  const isAdmin = user?.role === 'admin';
+
+  const renderContent = () => {
+    if (isAdmin) {
+      switch (adminView) {
+        case 'dashboard': return <AdminDashboardView />;
+        case 'clients': return <AdminClientsView />;
+        case 'client-detail': return <AdminClientDetailView />;
+        case 'projects': return <ProjectsListView isAdmin />;
+        case 'project-detail': return <ProjectDetail projectId={usePortalStore.getState().selectedProjectId || ''} isClient={false} onBack={() => setAdminView('projects')} />;
+        case 'deliverables': return <AdminDeliverablesView />;
+        case 'invoices': return <InvoicesListView isAdmin />;
+        case 'invoice-create': return <AdminCreateInvoiceView />;
+        case 'invoice-detail': return <InvoiceDetail invoiceId={usePortalStore.getState().selectedInvoiceId || ''} isClient={false} onBack={() => setAdminView('invoices')} />;
+        case 'messages': return <MessagesView />;
+        default: return <AdminDashboardView />;
+      }
+    } else {
+      switch (clientView) {
+        case 'dashboard': return <ClientDashboardView />;
+        case 'projects': return <ProjectsListView isAdmin={false} />;
+        case 'project-detail': return <ProjectDetail projectId={usePortalStore.getState().selectedProjectId || ''} isClient={true} onBack={() => setClientView('projects')} />;
+        case 'invoices': return <InvoicesListView isAdmin={false} />;
+        case 'invoice-detail': return <InvoiceDetail invoiceId={usePortalStore.getState().selectedInvoiceId || ''} isClient={true} onBack={() => setClientView('invoices')} />;
+        case 'messages': return <MessagesView />;
+        default: return <ClientDashboardView />;
+      }
+    }
+  };
+
+  const sidebarNavItems = isAdmin
+    ? [
+        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+        { id: 'clients', label: 'Clientes', icon: <Users className="w-5 h-5" /> },
+        { id: 'projects', label: 'Proyectos', icon: <FolderKanban className="w-5 h-5" /> },
+        { id: 'deliverables', label: 'Entregables', icon: <ClipboardCheck className="w-5 h-5" /> },
+        { id: 'invoices', label: 'Facturas', icon: <Receipt className="w-5 h-5" /> },
+        { id: 'messages', label: 'Mensajes', icon: <MessageSquare className="w-5 h-5" /> },
+      ]
+    : [
+        { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+        { id: 'projects', label: 'Proyectos', icon: <FolderKanban className="w-5 h-5" /> },
+        { id: 'invoices', label: 'Facturas', icon: <Receipt className="w-5 h-5" /> },
+        { id: 'messages', label: 'Mensajes', icon: <MessageSquare className="w-5 h-5" /> },
+      ];
+
+  const activeView = isAdmin ? adminView : clientView;
+  const handleNav = (id: string) => {
+    if (isAdmin) (usePortalStore.getState() as { setAdminView: (v: string) => void }).setAdminView(id as typeof adminView);
+    else (usePortalStore.getState() as { setClientView: (v: string) => void }).setClientView(id as typeof clientView);
+    if (window.innerWidth < 768) toggleSidebar();
+  };
+
+  const unreadCount = (usePortalStore.getState().stats as Record<string, number>)?.unreadMessages || 0;
+
+  return (
+    <div className="min-h-screen flex bg-slate-50">
+      {/* Mobile overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 z-40 md:hidden"
+            onClick={toggleSidebar}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200/80 flex flex-col transform transition-transform duration-300 ease-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        {/* Brand */}
+        <div className="px-5 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-lg tracking-tight">ClientPortal</span>
+          </div>
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+
+        <Separator />
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {sidebarNavItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => handleNav(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
+                activeView === item.id
+                  ? 'bg-emerald-50 text-emerald-700 shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <span className={activeView === item.id ? 'text-emerald-600' : 'text-slate-400'}>{item.icon}</span>
+              {item.label}
+              {item.id === 'messages' && unreadCount > 0 && (
+                <span className="ml-auto bg-rose-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        <Separator />
+
+        {/* User info */}
+        <div className="p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <Avatar className="w-10 h-10">
+              <AvatarFallback className={`${isAdmin ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} font-semibold`}>
+                {(user?.fullName || 'U').charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold truncate">{user?.fullName}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.company}</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="w-full justify-start text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl" onClick={logout}>
+            <LogOut className="w-4 h-4 mr-2" /> Cerrar sesión
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0">
+        {/* Top bar */}
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-6 py-3 flex items-center gap-3">
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+            <Menu className="w-5 h-5" />
+          </Button>
+          <div className="flex-1" />
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Badge variant="secondary" className="bg-amber-100 text-amber-800 font-medium">
+                <Shield className="w-3 h-3 mr-1" /> Admin
+              </Badge>
+            )}
+          </div>
+        </header>
+
+        {/* Page content */}
+        <div className="p-6">
+          <AnimatePresence mode="wait">
+            {renderContent()}
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// ============ MAIN PAGE ============
+export default function HomePage() {
+  const { token, user, setUser, setToken, initSocket, setClients, setProjects, setInvoices, setMessages, setStats, logout } = usePortalStore();
+  const [initializing, setInitializing] = useState(true);
+
+  // Restore session on mount
+  useEffect(() => {
+    const restore = async () => {
+      const savedToken = localStorage.getItem('portal_token');
+      if (!savedToken) {
+        setInitializing(false);
+        return;
+      }
+      try {
+        const userData = await api('/api/auth/me');
+        if (userData) {
+          setToken(savedToken);
+          setUser(userData);
+          initSocket(userData.id);
+        }
+      } catch {
+        logout();
+      } finally {
+        setInitializing(false);
+      }
+    };
+    restore();
+  }, []);
+
+  // Fetch data when user is set
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchData = async () => {
+      try {
+        const [statsData] = await Promise.all([
+          api('/api/stats'),
+        ]);
+        setStats(statsData);
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+      }
+    };
+    fetchData();
+  }, [user]);
+
+  // Fetch contextual data based on view
+  useEffect(() => {
+    if (!user) return;
+
+    const isAdmin = user.role === 'admin';
+    const fetchCtx = async () => {
+      try {
+        if (isAdmin) {
+          const [c, p, inv] = await Promise.all([
+            api('/api/clients'),
+            api('/api/projects'),
+            api('/api/invoices'),
+          ]);
+          setClients(c);
+          setProjects(p);
+          setInvoices(inv);
+        } else {
+          const [p, inv, statsData] = await Promise.all([
+            api('/api/projects'),
+            api('/api/invoices'),
+            api('/api/stats'),
+          ]);
+          setProjects(p);
+          setInvoices(inv);
+          setStats(statsData);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    };
+    fetchCtx();
+  }, [user?.id]);
+
+  if (initializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-muted-foreground text-sm">Cargando portal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !token) return <AuthView />;
+  return <AppNavigator />;
+}

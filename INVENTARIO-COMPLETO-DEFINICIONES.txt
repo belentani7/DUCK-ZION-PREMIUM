@@ -1,0 +1,404 @@
+================================================================
+DUCK / BELENTANI · CANAL ZION · PAQUETE PREMIUM
+INVENTARIO COMPLETO CON DEFINICIONES
+Generado: 15-08-2026 · Autoría: Pedro Belentani
+================================================================
+
+
+=== 01-STUDIO-OS ===
+DEFINICION: SOFTWARE - Duck Studio OS: Next.js + Prisma + 35 API + WebSocket + mini-services. Herramienta principal de produccion
+
+  [CARPETA] docs/
+  [CARPETA] evidence/
+  [CARPETA] experience-assets/
+  [CARPETA] manual-assets/
+  [CARPETA] source/
+  duck-studio-manual.pdf  [594 KB]
+  index.html  [18 KB]
+  README.md  [1 KB]
+  aesthetic-study.md  [715 B]
+  AUDITORIA-3000-PONTOS.csv  [666 KB]
+  AUDITORIA-3000-RESUMO.json  [6 KB]
+  client-channel.md  [464 B]
+  tools.md  [377 B]
+  assistant-widget.png  [144 KB]
+  automations-round2.png  [83 KB]
+  calendar-view.png  [87 KB]
+  client-portal.png  [131 KB]
+  command-palette.png  [106 KB]
+  dashboard-overview.png  [114 KB]
+  dashboard-round2.png  [114 KB]
+  invoice-dialog.png  [108 KB]
+  onboarding-step-1.png  [91 KB]
+  onboarding-step-2.png  [94 KB]
+  owner-dashboard.png  [108 KB]
+  processing-chains-round2.png  [110 KB]
+  project-detail.png  [88 KB]
+  projects-view.png  [108 KB]
+  qc-checklist.png  [89 KB]
+  waveform-player.png  [98 KB]
+  [CARPETA] vendor/
+  client.png  [1,5 MB]
+  cover.png  [1,6 MB]
+  tools.png  [1,5 MB]
+  [CARPETA] .zscripts/
+  [CARPETA] db/
+  [CARPETA] examples/
+  [CARPETA] mini-services/
+  [CARPETA] prisma/
+  [CARPETA] public/
+  [CARPETA] scripts/
+  [CARPETA] src/
+  [CARPETA] tests/
+  .gitignore  [586 B]
+  bun.lock  [320 KB]
+  Caddyfile  [493 B]
+  components.json  [430 B]
+  eslint.config.mjs  [2 KB]
+  next-env.d.ts  [253 B]
+  next.config.ts  [389 B]
+  package.json  [3 KB]
+  postcss.config.mjs  [81 B]
+  tailwind.config.ts  [2 KB]
+  tsconfig.json  [730 B]
+  worklog.md  [30 KB]
+
+=== 02-ECOSYSTEM ===
+DEFINICION: SOFTWARE - Duck Ecosystem: React + Vite + tRPC + Drizzle + duckRouters + tests
+
+  [CARPETA] client/
+  [CARPETA] drizzle/
+  [CARPETA] patches/
+  [CARPETA] server/
+  [CARPETA] shared/
+  .gitignore  [1 KB]
+  .gitkeep  [0 B]
+  .prettierignore  [310 B]
+  .prettierrc  [310 B]
+  components.json  [388 B]
+  drizzle.config.ts  [353 B]
+  package.json  [4 KB]
+  pnpm-lock.yaml  [315 KB]
+  template.json  [15 KB]
+  todo.md  [1 KB]
+  tsconfig.json  [657 B]
+  vite.config.ts  [6 KB]
+  vite.config.ts.bak  [847 B]
+  vitest.config.ts  [499 B]
+  [CARPETA] public/
+  [CARPETA] src/
+  index.html  [911 B]
+  [CARPETA] meta/
+  [CARPETA] migrations/
+  0000_fancy_sue_storm.sql  [483 B]
+  0001_bored_sabra.sql  [1 KB]
+  relations.ts  [27 B]
+  schema.ts  [3 KB]
+  wouter@3.7.1.patch  [918 B]
+  [CARPETA] _core/
+  auth.logout.test.ts  [2 KB]
+  db.ts  [2 KB]
+  duck.test.ts  [1 KB]
+  duckRouters.ts  [13 KB]
+  routers.ts  [712 B]
+  storage.ts  [3 KB]
+  [CARPETA] _core/
+  const.ts  [2 KB]
+  types.ts  [158 B]
+
+=== 03-TOOLKIT-GEMA-1 ===
+DEFINICION: HERRAMIENTA - DuckStudioToolkit_A_Gema_1.html: afinador cromatico + masterizacao + 8 paginas (abrir en navegador)
+
+  duck-toolkit-screenshot.png  [106 KB]
+  DuckStudioToolkit_A_Gema_1.html  [56 KB]
+
+=== 04-STUDIO-LOCAL ===
+DEFINICION: SOFTWARE - Studio Local Win11: base de conocimiento productor PT-BR + clones (dexed, chowdsp-byod, tauri, wavesurfer)
+
+  [CARPETA] github-clones/
+  [CARPETA] html-offline/
+  [CARPETA] scripts/
+  .gitignore  [97 B]
+  AGENTS.md  [3 KB]
+  ARQUITETURA-WIN11-FL-STUDIO.md  [6 KB]
+  AUDITORIA-FINAL.md  [5 KB]
+  BASE-CONHECIMENTO-PTBR.json  [10 KB]
+  CATALOGO-PREMIUM-BENCHMARK.md  [6 KB]
+  CATALOGO-RECURSOS.json  [12 KB]
+  CHECKLIST-ACEITACAO.md  [5 KB]
+  GITHUB-CLONES-MANIFEST.tsv  [1 KB]
+  GITHUB-CLONES.md  [2 KB]
+  HTML-OFFLINE.md  [1 KB]
+  MANIFEST-SHA256.tsv  [3 KB]
+  MAPA-CONHECIMENTO-PRODUTOR-PTBR.md  [11 KB]
+  MODELO-LOCAL-E-BASE-OFFLINE.md  [8 KB]
+  PC-ALVO.md  [2 KB]
+  PROMPT-MESTRE-DUCK-STUDIO.md  [23 KB]
+  README.md  [3 KB]
+  RECURSOS-AUDIO-PLUGINS.md  [7 KB]
+  REFERENCIAS-LOCAIS.tsv  [2 KB]
+  [CARPETA] chowdsp-byod/
+  [CARPETA] dexed/
+  [CARPETA] neural-amp-modeler/
+  [CARPETA] tauri/
+  [CARPETA] tauri-plugins-workspace/
+  [CARPETA] tonejs/
+  [CARPETA] tonejs-midi/
+  [CARPETA] vst3sdk/
+  [CARPETA] wavesurfer-js/
+  [CARPETA] assets/
+  agente.html  [5 KB]
+  index.html  [6 KB]
+  instrumentos.html  [10 KB]
+  memoria.html  [7 KB]
+  mixer.html  [10 KB]
+  recursos.html  [5 KB]
+  browser-smoke.cjs  [9 KB]
+  verify-manifest.ps1  [2 KB]
+  verify-spec.ps1  [5 KB]
+
+=== 05-HERRAMIENTAS-PREMIUM ===
+DEFINICION: DOCUMENTOS - Manual de Herramientas Duck Premium (PDF 18MB) + 2 prompts maestros + mapa + scripts
+
+  [CARPETA] DOCS/
+  [CARPETA] ENTREGABLES/
+  [CARPETA] FUENTE/
+  [CARPETA] QA/
+  [CARPETA] SCRIPTS/
+  MANUAL-FERRAMENTAS-DUCK-PREMIUM-2026-08-14.pdf  [17,5 MB]
+  MAPA_MANOS_ABIERTAS_2026-08-14.txt  [17 KB]
+  PROMPT-MAESTRO-DUCK-2026-08-14.md  [26 KB]
+  PROMPT-MAESTRO-DUCK-PREMIUM-2026-08-14.md  [25 KB]
+  gerar-manual-premium-duck.py  [13 KB]
+
+=== 06-EXPERIENCIA-INMERSIVA ===
+DEFINICION: HERRAMIENTA - Pack Experiencia Inmersiva: web GSAP/Lenis + auditoria (manifest SHA256, provenance)
+
+  [CARPETA] scripts/
+  [CARPETA] web/
+  ASSET-PROVENANCE.tsv  [3 KB]
+  AUDIT-TOOLS.md  [4 KB]
+  AUDIT.md  [4 KB]
+  EXCLUSIONS.md  [1 KB]
+  LINK-AUDIT.tsv  [950 B]
+  MANIFEST-SHA256.tsv  [2 KB]
+  README.md  [3 KB]
+  THIRD-PARTY-NOTICES.md  [1 KB]
+  audit-pack.ps1  [3 KB]
+  smoke-browser.cjs  [14 KB]
+  verify-pack.ps1  [4 KB]
+  [CARPETA] assets/
+  [CARPETA] fonts/
+  [CARPETA] vendor/
+  app.js  [35 KB]
+  index.html  [17 KB]
+  styles.css  [33 KB]
+
+=== 07-GEMA-LAB ===
+DEFINICION: HERRAMIENTA - Gema 1 Lab: assets (logo, CSS, GSAP)
+
+  [CARPETA] assets/
+  [CARPETA] docs/
+  duck-logo.png  [672 KB]
+  duck.css  [15 KB]
+  gsap.min.js  [71 KB]
+
+=== 08-ENVIO-GEMA-01 ===
+DEFINICION: ENTREGA - Duck Studio OS Gema 01: ZIP + email eml + HTML inicio + QA (desktop/mobile/revelacao)
+
+  DUCK-STUDIO-OS-GEMA-01.zip  [6,5 MB]
+  EMAIL-DUCK-GEMA-01.eml  [9,5 MB]
+  INICIAR-EXPERIENCIA-DUCK.html  [564 KB]
+  LEIA-ME-ANTES-DE-ENVIAR.txt  [349 B]
+  MANIFESTO-SHA256.txt  [743 B]
+  QA-BROWSER.json  [399 B]
+  QA-DESKTOP.png  [1,4 MB]
+  QA-MOBILE.png  [401 KB]
+  QA-REVELACAO.png  [937 KB]
+  VERIFICACAO.json  [431 B]
+
+=== 09-MANUALES ===
+DEFINICION: DOCUMENTACION - Manuales PDF (v1 5 paginas + duck-studio-manual) + paginas renderizadas PNG
+
+  duck-studio-manual-v1-5-paginas.pdf  [6,5 MB]
+  duck-studio-manual.pdf  [594 KB]
+  page-1.png  [538 KB]
+  page-2.png  [259 KB]
+  page-3.png  [393 KB]
+  page-4.png  [662 KB]
+  page-5.png  [1,2 MB]
+
+=== 10-ZIPS ===
+DEFINICION: ARCHIVOS - ZIPs originales: duck-studio-delivery (11.9MB), protected (6.8MB), GEMA-01, duck-ecosystem x3, duck.tar
+
+  duck-ecosystem (1).zip  [1,2 MB]
+  duck-ecosystem 3(1).zip  [251 KB]
+  duck-ecosystem.zip  [247 KB]
+  duck-studio-delivery-protected.zip  [6,6 MB]
+  duck-studio-delivery.zip  [11,4 MB]
+  DUCK-STUDIO-OS-GEMA-01.zip  [6,5 MB]
+  duck.tar  [1,3 MB]
+  files (1).zip  [156 KB]
+
+=== 11-PORTAL-CLIENTES ===
+DEFINICION: SOFTWARE / CRM - Portal de Clientes: Next.js + Prisma + Socket.io + chat + mini-services + Android + desktop
+
+  [CARPETA] .zscripts/
+  [CARPETA] agent-ctx/
+  [CARPETA] android/
+  [CARPETA] db/
+  [CARPETA] desktop/
+  [CARPETA] desktop-app/
+  [CARPETA] download/
+  [CARPETA] examples/
+  [CARPETA] mini-services/
+  [CARPETA] mobile-shell/
+  [CARPETA] prisma/
+  [CARPETA] public/
+  [CARPETA] release/
+  [CARPETA] scripts/
+  [CARPETA] src/
+  [CARPETA] tests/
+  [CARPETA] tool-results/
+  [CARPETA] upload/
+  .env  [34 B]
+  .gitignore  [586 B]
+  bun.lock  [325 KB]
+  Caddyfile  [493 B]
+  capacitor.config.ts  [336 B]
+  components.json  [430 B]
+  eslint.config.mjs  [2 KB]
+  next-env.d.ts  [328 B]
+  next.config.ts  [275 B]
+  package.json  [5 KB]
+  portal-admin.png  [94 KB]
+  portal-chat.err.log  [0 B]
+  portal-chat.out.log  [34 B]
+  portal-client.png  [81 KB]
+  portal-login-settled.png  [498 KB]
+  portal-login.png  [487 KB]
+  portal-web.err.log  [1 KB]
+  portal-web.out.log  [28 KB]
+  postcss.config.mjs  [81 B]
+  tailwind.config.ts  [2 KB]
+  tsconfig.json  [730 B]
+  tsconfig.tsbuildinfo  [307 KB]
+  worklog.md  [4 KB]
+  build.sh  [4 KB]
+  dev.pid  [5 B]
+  dev.sh  [4 KB]
+  mini-services-build.sh  [2 KB]
+  mini-services-install.sh  [2 KB]
+  mini-services-start.sh  [3 KB]
+  start.sh  [4 KB]
+  components-creation-main-agent.md  [1 KB]
+  task1-main.md  [2 KB]
+  [CARPETA] app/
+  [CARPETA] capacitor-cordova-android-plugins/
+  [CARPETA] gradle/
+  .gitignore  [2 KB]
+  build.gradle  [637 B]
+  capacitor.settings.gradle  [207 B]
+  gradle.properties  [987 B]
+  gradlew  [9 KB]
+  gradlew.bat  [3 KB]
+  settings.gradle  [208 B]
+  variables.gradle  [498 B]
+  custom.db  [476 KB]
+  main.cjs  [4 KB]
+  main.cjs  [4 KB]
+  package.json  [315 B]
+  README.md  [34 B]
+  [CARPETA] websocket/
+  [CARPETA] chat-service/
+  .gitkeep  [0 B]
+  [CARPETA] public/
+  schema.prisma  [4 KB]
+  seed.ts  [36 KB]
+  [CARPETA] audio/
+  logo.svg  [1 KB]
+  robots.txt  [160 B]
+  [CARPETA] web/
+  [CARPETA] windows/
+  AUDITORIA-500.json  [87 KB]
+  AUDITORIA-500.md  [136 B]
+  audit-500.mjs  [7 KB]
+  build-android.mjs  [1 KB]
+  package-final.mjs  [3 KB]
+  prepare-standalone.mjs  [1 KB]
+  prepare-web-package.mjs  [2 KB]
+  repair-demo-data.mjs  [1 KB]
+  [CARPETA] app/
+  [CARPETA] components/
+  [CARPETA] hooks/
+  [CARPETA] lib/
+  visual-smoke.mjs  [4 KB]
+  bash_1785802351080_95c73df697f0.txt  [98 KB]
+  bash_1785917318741_3e1fae9edfd5.txt  [60 KB]
+  read_1783498468971_421e4e27e346.txt  [101 KB]
+  read_1783498496063_d4fa7d9a39ce.txt  [32 KB]
+  read_1783498500068_cd053cdd49ad.txt  [37 KB]
+  read_1783498505227_30f33a0df01c.txt  [37 KB]
+  read_1785802133668_44e8cdfded47.txt  [62 KB]
+  read_1785802134212_421e4e27e346.txt  [101 KB]
+  read_1785917775066_2e6173cdc903.txt  [63 KB]
+  read_1785923534218_65ffc92e6854.txt  [69 KB]
+  read_1785923537249_9e22ca2f79da.txt  [81 KB]
+  read_1785923540403_b1e249da72c1.txt  [37 KB]
+  admin-clients.png  [56 KB]
+  admin-dashboard.png  [56 KB]
+  chat-Portal de Automatizaci├│n de Clientes.txt  [142 KB]
+  Pasted Content_1785916081842.txt  [84 KB]
+
+=== 12-REFERENCIAS-VISUALES ===
+DEFINICION: FOTOS/MEDIA - duck logo, gema esmeralda (5.9MB), screenshot toolkit
+
+  duck logo.png  [672 KB]
+  duck-green-artifact-desktop.png  [5,7 MB]
+  duck-toolkit-screenshot.png  [106 KB]
+
+=== CONTENIDO ===
+DEFINICION: PREPARACION - Contenido textual del universo
+
+
+=== IMAGENES ===
+DEFINICION: FOTOS - 16 imagenes con definiciones (gema, artefacto rojo, Judas Experience, Noiacore Lab, retratos, planetas, personaje)
+
+  belentani-red-artifact.png  [5,9 MB]
+  ChatGPT Image 13 ago 2026, 02_56_40.png  [1,6 MB]
+  ChatGPT Image 13 ago 2026, 03_02_26.png  [1,6 MB]
+  ChatGPT Image 13 ago 2026, 03_02_33.png  [1,6 MB]
+  ChatGPT Image 13 ago 2026, 03_10_24.png  [2,0 MB]
+  copilot_image_1780517769334.jpeg  [279 KB]
+  d7a3afdc-618f-4551-bac7-6dba646cd93f.jpg  [165 KB]
+  DEFINICION-DE-IMAGENES.md  [5 KB]
+  duck-green-artifact.png  [5,7 MB]
+  file_000000007a3081f4a91766fc0439581d.png  [250 KB]
+  Gemini_Generated_Image_8uq86t8uq86t8uq8.png  [6,8 MB]
+  Gemini_Generated_Image_aaqdgbaaqdgbaaqd.png  [7,6 MB]
+  Gemini_Generated_Image_h043unh043unh043.png  [7,6 MB]
+  Gemini_Generated_Image_qgubceqgubceqgub.png  [7,3 MB]
+  nnn.png  [1,8 MB]
+  Untitled 2 (2).png  [53 KB]
+  Untitled 2.png  [53 KB]
+
+=== INVENTARIO ===
+DEFINICION: PREPARACION - Inventario de archivos
+
+
+=== MANUAL ===
+DEFINICION: ENTREGA - Manual premium del ecosistema (PDF 6.2MB fondo negro + HTML + media)
+
+  [CARPETA] media/
+  DUCK_ZION_MANUAL_PREMIUM.html  [16 KB]
+  DUCK_ZION_MANUAL_PREMIUM.pdf  [6,0 MB]
+  duck-green-artifact.png  [5,7 MB]
+  duck-logo.png  [672 KB]
+  duck-toolkit-screenshot.png  [106 KB]
+
+=== PROMPTS ===
+DEFINICION: PROMPTS - 2 prompts maestros para IA (mejorar todo + generar PDF)
+
+  PROMPT-MAESTRO-DUCK-ZION.md  [6 KB]
+  PROMPT-MEJORAR-TODO-GENERAR-PDF.md  [7 KB]
+

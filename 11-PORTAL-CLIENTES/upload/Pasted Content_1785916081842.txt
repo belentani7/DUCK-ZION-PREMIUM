@@ -1,0 +1,2601 @@
+El usuario está pidiendo una mejora máxima del prompt, que valga millones para venderlo. El prompt original era sobre un "Portal de Automatización de Clientes" que ya construí en el historial. Ahora el usuario quiere que tome ese concepto, lo mejore al máximo, lo transforme en un producto vendible por millones, y que además incluya opciones para generar un HTML, un EXE y un APK completamente funcionales.
+
+Es decir, el usuario quiere:
+
+Un prompt maestro mejorado al máximo
+
+Un producto completo: aplicación web full-stack, ejecutable para Windows, y APK para Android
+
+Que sea vendible por millones
+
+Voy a responder con un prompt maestro definitivo y una arquitectura de producto completa.
+
+El prompt debe:
+
+Ser ultra-detallado y estructurado
+
+Cubrir todos los aspectos (frontend, backend, mobile, desktop)
+
+Incluir estrategia de monetización y posicionamiento
+
+Tener un enfoque de "producto millonario"
+
+Además, voy a proporcionar la arquitectura técnica completa y las instrucciones para generar el HTML, EXE y APK.
+
+El producto: "ClientPortal Pro" - un portal de automatización de clientes con inteligencia artificial, multi-rol, multi-tenant, con aplicaciones web, desktop y móvil.
+
+🚀 CLIENTPORTAL PRO – El Sistema de Automatización de Clientes que vale MILLONES
+De portal de gestión a ecosistema de inteligencia de clientes. La plataforma que las agencias y consultoras venderán por $50,000+ al año.
+
+📌 EL PRODUCTO QUE VAS A CONSTRUIR
+ClientPortal Pro no es solo un panel de clientes. Es un ecosistema completo de automatización de relaciones con clientes que:
+
+Automatiza la entrega de proyectos con IA
+
+Predice la satisfacción del cliente antes de que se vaya
+
+Genera facturas automáticamente basadas en entregables completados
+
+Chat inteligente que responde preguntas frecuentes sin intervención humana
+
+Dashboard de salud del cliente en tiempo real
+
+Múltiples canales de entrega: Web, Desktop (Windows EXE), Móvil (Android APK)
+
+🎯 NICHO DE MERCADO Y PRECIOS
+Segmento	Valor	Precio
+Agencias de marketing	Gestionan 50+ clientes, necesitan visibilidad	$997/mes
+Consultoras tecnológicas	Proyectos complejos, múltiples entregables	$1,497/mes
+Freelancers de alto nivel	10-20 clientes, automatización total	$497/mes
+Empresas SaaS	Dashboard de clientes white-label	$4,997/mes
+Licencia perpetua (self-hosted)	Código completo, sin límites	$49,997
+🏗️ ARQUITECTURA DEL PRODUCTO (El "Circuito" Completo)
+text
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    CLIENTPORTAL PRO ECOSYSTEM                          │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  📱 APK (Android)    🖥️ EXE (Windows)    🌐 Web (Next.js 16)          │
+│       ↓                    ↓                    ↓                      │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │              API Gateway (Node.js + Express)                    │   │
+│  │  - Autenticación JWT + OAuth2                                  │   │
+│  │  - Rate limiting por cliente                                   │   │
+│  │  - WebSocket (Socket.io) para chat en tiempo real              │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│       ↓                    ↓                    ↓                      │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                    Microservicios                               │   │
+│  │  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐      │   │
+│  │  │ Proyectos  │ │ Entregas  │ │ Facturas  │ │ Analytics │      │   │
+│  │  └───────────┘ └───────────┘ └───────────┘ └───────────┘      │   │
+│  │  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐      │   │
+│  │  │   Chat    │ │  IA Agent │ │ Notific.  │ │   Audit   │      │   │
+│  │  └───────────┘ └───────────┘ └───────────┘ └───────────┘      │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│       ↓                                                               │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │              Base de Datos (PostgreSQL + Redis)                 │   │
+│  │  - Multi-tenant (cada cliente ve solo sus datos)              │   │
+│  │  - Caché de consultas frecuentes (Redis)                      │   │
+│  │  - Colas de trabajos (BullMQ) para procesamiento asíncrono    │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+│  🤖 IA Integrada:                                                       │
+│  - OpenAI GPT-4o-mini (generación de resúmenes, respuestas)           │
+│  - Predicción de abandono de clientes (regresión logística)           │
+│  - Clasificación automática de tickets de soporte                     │
+│  - Generación de propuestas comerciales                               │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+🐍 CÓDIGO DEL BACKEND (Node.js + Express + Prisma)
+1. Esquema Prisma (Base de Datos)
+prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String   // Hash bcrypt
+  name        String
+  role        Role     @default(CLIENT)
+  company     String?
+  avatar      String?
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  projects    Project[]
+  invoices    Invoice[]
+  messages    Message[]
+  notifications Notification[]
+  projectsAsAdmin Project[] @relation("AdminProjects")
+
+  // Preferencias
+  theme       String   @default("dark")
+  language    String   @default("es")
+  notificationsEnabled Boolean @default(true)
+
+  @@map("users")
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  taxId       String?
+  address     String?
+  city        String?
+  country     String   @default("ES")
+  postalCode  String?
+  industry    String?
+  contactName String?
+  contactEmail String?
+  contactPhone String?
+  healthScore Int      @default(100) // 0-100
+  churnRisk   Float    @default(0.0) // 0-1
+  lastActivity DateTime @default(now())
+  
+  projects    Project[]
+  invoices    Invoice[]
+
+  @@map("clients")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(PLANNING)
+  startDate   DateTime
+  endDate     DateTime?
+  budget      Float?
+  progress    Int      @default(0) // 0-100
+  priority    Priority @default(MEDIUM)
+
+  // Relaciones
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  adminId     String
+  admin       User     @relation("AdminProjects", fields: [adminId], references: [id])
+
+  deliverables Deliverable[]
+  invoices     Invoice[]
+  activities   Activity[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Deliverable {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      DeliverableStatus @default(PENDING)
+  dueDate     DateTime
+  completedAt DateTime?
+
+  // Relaciones
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  assignedTo  String?
+  assignedUser User?   @relation(fields: [assignedTo], references: [id])
+
+  files       DeliverableFile[]
+  comments    DeliverableComment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("deliverables")
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  number      String   @unique
+  amount      Float
+  tax         Float    @default(0.0)
+  total       Float
+  status      InvoiceStatus @default(PENDING)
+  issueDate   DateTime @default(now())
+  dueDate     DateTime
+  paidAt      DateTime?
+  notes       String?
+
+  // Relaciones
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id])
+  items       InvoiceItem[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Float
+  total       Float
+
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+
+  @@map("invoice_items")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  content     String
+  senderId    String
+  sender      User     @relation(fields: [senderId], references: [id])
+  recipientId String
+  recipient   User     @relation(fields: [recipientId], references: [id])
+  read        Boolean  @default(false)
+  readAt      DateTime?
+
+  // Para hilos de conversación
+  threadId    String
+  parentId    String?  // Para respuestas en hilo
+  parent      Message? @relation("Thread", fields: [parentId], references: [id])
+  replies     Message[] @relation("Thread")
+
+  createdAt   DateTime @default(now())
+
+  @@index([senderId, recipientId])
+  @@map("messages")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  content     String
+  type        NotificationType @default(INFO)
+  read        Boolean  @default(false)
+  link        String?
+  createdAt   DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  @@map("activities")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String
+  resource    String
+  resourceId  String
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  CLIENT
+  STAFF
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum DeliverableStatus {
+  PENDING
+  IN_PROGRESS
+  REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+  REMINDER
+}
+2. API REST Completa (Express)
+javascript
+// server.js
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+
+const prisma = new PrismaClient();
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*", methods: ["GET", "POST"] }
+});
+
+// ============================
+// MIDDLEWARES
+// ============================
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' }));
+
+// Rate limiting por IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 1000, // 1000 peticiones por IP
+  message: { error: 'Demasiadas peticiones, inténtalo más tarde.' }
+});
+app.use('/api/', limiter);
+
+// ============================
+// AUTENTICACIÓN
+// ============================
+const JWT_SECRET = process.env.JWT_SECRET || 'clientportal-secret-key-change-me';
+
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+};
+
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ error: 'No se proporcionó token de autenticación' });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Token inválido o expirado' });
+  }
+};
+
+// ============================
+// RUTAS DE AUTENTICACIÓN
+// ============================
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { 
+        projectsAsAdmin: true,
+        projects: true
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    // Obtener datos del cliente si es CLIENT
+    let clientData = null;
+    if (user.role === 'CLIENT') {
+      clientData = await prisma.client.findUnique({
+        where: { userId: user.id },
+        include: {
+          projects: true,
+          invoices: true
+        }
+      });
+    }
+
+    const token = generateToken(user);
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        company: user.company,
+        avatar: user.avatar,
+        client: clientData
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { email, password, name, role, company } = req.body;
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Email, contraseña y nombre son obligatorios' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'El email ya está registrado' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+        role: role || 'CLIENT',
+        company: company || ''
+      }
+    });
+
+    // Si es CLIENT, crear registro en la tabla Client
+    if (user.role === 'CLIENT') {
+      await prisma.client.create({
+        data: {
+          userId: user.id,
+          company: company || user.name + ' Empresa',
+          contactName: name,
+          contactEmail: email
+        }
+      });
+    }
+
+    const token = generateToken(user);
+    res.status(201).json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        company: user.company
+      }
+    });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ============================
+// RUTAS DE USUARIOS (ADMIN)
+// ============================
+app.get('/api/users', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'No tienes permisos para ver usuarios' });
+    }
+    const users = await prisma.user.findMany({
+      include: { 
+        projectsAsAdmin: true,
+        projects: true,
+        client: true 
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+});
+
+// ============================
+// RUTAS DE CLIENTES
+// ============================
+app.get('/api/clients', verifyToken, async (req, res) => {
+  try {
+    // Si es CLIENT, ver su propio cliente
+    if (req.user.role === 'CLIENT') {
+      const client = await prisma.client.findUnique({
+        where: { userId: req.user.id },
+        include: {
+          projects: {
+            include: { deliverables: true, invoices: true }
+          },
+          invoices: true
+        }
+      });
+      return res.json([client]);
+    }
+
+    // ADMIN: ver todos los clientes
+    const clients = await prisma.client.findMany({
+      include: {
+        user: true,
+        projects: {
+          include: { deliverables: true, invoices: true }
+        },
+        invoices: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(clients);
+  } catch (error) {
+    console.error('Error clients:', error);
+    res.status(500).json({ error: 'Error al obtener clientes' });
+  }
+});
+
+app.get('/api/clients/:id', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const client = await prisma.client.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        projects: {
+          include: { 
+            deliverables: true,
+            invoices: true,
+            admin: true
+          }
+        },
+        invoices: {
+          include: { items: true }
+        }
+      }
+    });
+    if (!client) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+    res.json(client);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el cliente' });
+  }
+});
+
+// ============================
+// RUTAS DE PROYECTOS
+// ============================
+app.get('/api/projects', verifyToken, async (req, res) => {
+  try {
+    let where = {};
+    
+    if (req.user.role === 'CLIENT') {
+      const client = await prisma.client.findUnique({
+        where: { userId: req.user.id }
+      });
+      if (client) {
+        where.clientId = client.id;
+      } else {
+        return res.json([]);
+      }
+    }
+
+    const projects = await prisma.project.findMany({
+      where,
+      include: {
+        client: { include: { user: true } },
+        admin: true,
+        deliverables: true,
+        invoices: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(projects);
+  } catch (error) {
+    console.error('Error projects:', error);
+    res.status(500).json({ error: 'Error al obtener proyectos' });
+  }
+});
+
+app.get('/api/projects/:id', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const project = await prisma.project.findUnique({
+      where: { id },
+      include: {
+        client: { include: { user: true } },
+        admin: true,
+        deliverables: true,
+        invoices: { include: { items: true } },
+        activities: { include: { user: true }, orderBy: { createdAt: 'desc' } }
+      }
+    });
+    if (!project) {
+      return res.status(404).json({ error: 'Proyecto no encontrado' });
+    }
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el proyecto' });
+  }
+});
+
+app.post('/api/projects', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Solo administradores pueden crear proyectos' });
+    }
+
+    const { name, description, clientId, startDate, endDate, budget, priority } = req.body;
+    const project = await prisma.project.create({
+      data: {
+        name,
+        description,
+        clientId,
+        adminId: req.user.id,
+        startDate: new Date(startDate),
+        endDate: endDate ? new Date(endDate) : null,
+        budget: budget ? parseFloat(budget) : null,
+        priority: priority || 'MEDIUM',
+        status: 'PLANNING'
+      },
+      include: {
+        client: { include: { user: true } },
+        admin: true
+      }
+    });
+    res.status(201).json(project);
+  } catch (error) {
+    console.error('Error create project:', error);
+    res.status(500).json({ error: 'Error al crear el proyecto' });
+  }
+});
+
+app.put('/api/projects/:id', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, status, progress, endDate, budget, priority } = req.body;
+    
+    const project = await prisma.project.update({
+      where: { id },
+      data: {
+        name,
+        description,
+        status,
+        progress: progress ? parseInt(progress) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
+        budget: budget ? parseFloat(budget) : undefined,
+        priority
+      },
+      include: {
+        client: { include: { user: true } },
+        admin: true,
+        deliverables: true
+      }
+    });
+    res.json(project);
+  } catch (error) {
+    console.error('Error update project:', error);
+    res.status(500).json({ error: 'Error al actualizar el proyecto' });
+  }
+});
+
+// ============================
+// RUTAS DE ENTREGABLES
+// ============================
+app.get('/api/deliverables', verifyToken, async (req, res) => {
+  try {
+    let where = {};
+    if (req.user.role === 'CLIENT') {
+      const client = await prisma.client.findUnique({
+        where: { userId: req.user.id },
+        include: { projects: true }
+      });
+      if (client) {
+        where.projectId = { in: client.projects.map(p => p.id) };
+      } else {
+        return res.json([]);
+      }
+    }
+
+    const deliverables = await prisma.deliverable.findMany({
+      where,
+      include: {
+        project: { include: { client: { include: { user: true } } } },
+        assignedUser: true
+      },
+      orderBy: { dueDate: 'asc' }
+    });
+    res.json(deliverables);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener entregables' });
+  }
+});
+
+app.post('/api/deliverables', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Solo administradores pueden crear entregables' });
+    }
+
+    const { name, description, projectId, dueDate, assignedTo } = req.body;
+    const deliverable = await prisma.deliverable.create({
+      data: {
+        name,
+        description,
+        projectId,
+        dueDate: new Date(dueDate),
+        assignedTo: assignedTo || null,
+        status: 'PENDING'
+      },
+      include: {
+        project: { include: { client: { include: { user: true } } } },
+        assignedUser: true
+      }
+    });
+    res.status(201).json(deliverable);
+  } catch (error) {
+    console.error('Error create deliverable:', error);
+    res.status(500).json({ error: 'Error al crear el entregable' });
+  }
+});
+
+app.put('/api/deliverables/:id', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, completedAt, assignedTo } = req.body;
+    
+    const deliverable = await prisma.deliverable.update({
+      where: { id },
+      data: {
+        status,
+        completedAt: status === 'APPROVED' ? new Date() : completedAt ? new Date(completedAt) : null,
+        assignedTo: assignedTo || undefined
+      },
+      include: {
+        project: { include: { client: { include: { user: true } } } },
+        assignedUser: true
+      }
+    });
+    res.json(deliverable);
+  } catch (error) {
+    console.error('Error update deliverable:', error);
+    res.status(500).json({ error: 'Error al actualizar el entregable' });
+  }
+});
+
+// ============================
+// RUTAS DE FACTURAS
+// ============================
+app.get('/api/invoices', verifyToken, async (req, res) => {
+  try {
+    let where = {};
+    if (req.user.role === 'CLIENT') {
+      const client = await prisma.client.findUnique({
+        where: { userId: req.user.id }
+      });
+      if (client) {
+        where.clientId = client.id;
+      } else {
+        return res.json([]);
+      }
+    }
+
+    const invoices = await prisma.invoice.findMany({
+      where,
+      include: {
+        client: { include: { user: true } },
+        project: true,
+        items: true
+      },
+      orderBy: { issueDate: 'desc' }
+    });
+    res.json(invoices);
+  } catch (error) {
+    console.error('Error invoices:', error);
+    res.status(500).json({ error: 'Error al obtener facturas' });
+  }
+});
+
+app.post('/api/invoices', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Solo administradores pueden crear facturas' });
+    }
+
+    const { clientId, projectId, items, issueDate, dueDate, notes, status } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: 'La factura debe tener al menos una línea' });
+    }
+
+    // Calcular totales
+    const itemsWithTotal = items.map(item => ({
+      ...item,
+      total: item.quantity * item.unitPrice
+    }));
+
+    const subtotal = itemsWithTotal.reduce((sum, item) => sum + item.total, 0);
+    const tax = subtotal * 0.21; // IVA 21%
+    const total = subtotal + tax;
+
+    // Generar número de factura
+    const count = await prisma.invoice.count();
+    const number = `FAC-${String(count + 1).padStart(6, '0')}-${new Date().getFullYear()}`;
+
+    const invoice = await prisma.invoice.create({
+      data: {
+        number,
+        clientId,
+        projectId: projectId || null,
+        amount: subtotal,
+        tax,
+        total,
+        issueDate: new Date(issueDate || Date.now()),
+        dueDate: new Date(dueDate || Date.now() + 30*24*60*60*1000),
+        notes,
+        status: status || 'PENDING',
+        items: {
+          create: itemsWithTotal
+        }
+      },
+      include: {
+        client: { include: { user: true } },
+        project: true,
+        items: true
+      }
+    });
+    res.status(201).json(invoice);
+  } catch (error) {
+    console.error('Error create invoice:', error);
+    res.status(500).json({ error: 'Error al crear la factura' });
+  }
+});
+
+app.put('/api/invoices/:id', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, paidAt } = req.body;
+    
+    const invoice = await prisma.invoice.update({
+      where: { id },
+      data: {
+        status,
+        paidAt: status === 'PAID' ? new Date() : paidAt ? new Date(paidAt) : null
+      },
+      include: {
+        client: { include: { user: true } },
+        project: true,
+        items: true
+      }
+    });
+    res.json(invoice);
+  } catch (error) {
+    console.error('Error update invoice:', error);
+    res.status(500).json({ error: 'Error al actualizar la factura' });
+  }
+});
+
+// ============================
+// RUTAS DE MENSAJES (Chat)
+// ============================
+app.get('/api/messages', verifyToken, async (req, res) => {
+  try {
+    const { withUser } = req.query;
+    let where = {};
+
+    if (withUser) {
+      where = {
+        OR: [
+          { senderId: req.user.id, recipientId: withUser },
+          { senderId: withUser, recipientId: req.user.id }
+        ]
+      };
+    } else {
+      // Obtener todos los contactos con los que ha chateado
+      const messages = await prisma.message.findMany({
+        where: {
+          OR: [
+            { senderId: req.user.id },
+            { recipientId: req.user.id }
+          ]
+        },
+        distinct: ['senderId', 'recipientId'],
+        orderBy: { createdAt: 'desc' }
+      });
+      
+      // Agrupar por contacto único
+      const contacts = new Map();
+      for (const msg of messages) {
+        const contactId = msg.senderId === req.user.id ? msg.recipientId : msg.senderId;
+        if (!contacts.has(contactId)) {
+          contacts.set(contactId, {
+            userId: contactId,
+            lastMessage: msg.content,
+            lastMessageAt: msg.createdAt,
+            unread: msg.recipientId === req.user.id && !msg.read
+          });
+        }
+      }
+      return res.json(Array.from(contacts.values()));
+    }
+
+    const messages = await prisma.message.findMany({
+      where,
+      include: {
+        sender: { select: { id: true, name: true, avatar: true, email: true } },
+        recipient: { select: { id: true, name: true, avatar: true, email: true } }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+    res.json(messages);
+  } catch (error) {
+    console.error('Error messages:', error);
+    res.status(500).json({ error: 'Error al obtener mensajes' });
+  }
+});
+
+app.post('/api/messages', verifyToken, async (req, res) => {
+  try {
+    const { recipientId, content } = req.body;
+    if (!recipientId || !content) {
+      return res.status(400).json({ error: 'Destinatario y contenido son obligatorios' });
+    }
+
+    const message = await prisma.message.create({
+      data: {
+        content,
+        senderId: req.user.id,
+        recipientId,
+        read: false,
+        threadId: [req.user.id, recipientId].sort().join('-')
+      },
+      include: {
+        sender: { select: { id: true, name: true, avatar: true } },
+        recipient: { select: { id: true, name: true, avatar: true } }
+      }
+    });
+
+    // Emitir a través de Socket.io
+    io.emit('new_message', message);
+
+    res.status(201).json(message);
+  } catch (error) {
+    console.error('Error send message:', error);
+    res.status(500).json({ error: 'Error al enviar el mensaje' });
+  }
+});
+
+app.put('/api/messages/read', verifyToken, async (req, res) => {
+  try {
+    const { senderId } = req.body;
+    await prisma.message.updateMany({
+      where: {
+        senderId,
+        recipientId: req.user.id,
+        read: false
+      },
+      data: { read: true, readAt: new Date() }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al marcar mensajes como leídos' });
+  }
+});
+
+// ============================
+// RUTAS DE ACTIVIDAD (Timeline)
+// ============================
+app.get('/api/activities', verifyToken, async (req, res) => {
+  try {
+    const activities = await prisma.activity.findMany({
+      where: req.user.role === 'ADMIN' ? {} : {
+        project: { client: { userId: req.user.id } }
+      },
+      include: {
+        user: { select: { id: true, name: true, avatar: true } },
+        project: true
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
+    res.json(activities);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener actividades' });
+  }
+});
+
+// ============================
+// RUTAS DE ESTADÍSTICAS
+// ============================
+app.get('/api/stats', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Solo administradores pueden ver estadísticas' });
+    }
+
+    const [
+      clientCount,
+      projectCount,
+      deliverableCount,
+      invoiceCount,
+      invoiceTotal,
+      overdueInvoices,
+      pendingDeliverables
+    ] = await Promise.all([
+      prisma.client.count(),
+      prisma.project.count(),
+      prisma.deliverable.count(),
+      prisma.invoice.count(),
+      prisma.invoice.aggregate({ _sum: { total: true } }),
+      prisma.invoice.count({ where: { status: 'OVERDUE' } }),
+      prisma.deliverable.count({ where: { status: { in: ['PENDING', 'IN_PROGRESS'] } } })
+    ]);
+
+    // Proyectos por estado
+    const projectsByStatus = await prisma.project.groupBy({
+      by: ['status'],
+      _count: true
+    });
+
+    // Facturas por estado
+    const invoicesByStatus = await prisma.invoice.groupBy({
+      by: ['status'],
+      _count: true,
+      _sum: { total: true }
+    });
+
+    // Ingresos mensuales (últimos 6 meses)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyRevenue = await prisma.invoice.groupBy({
+      by: [{ month: { issueDate: true } }],
+      where: {
+        status: 'PAID',
+        issueDate: { gte: sixMonthsAgo }
+      },
+      _sum: { total: true }
+    });
+
+    res.json({
+      clients: clientCount,
+      projects: projectCount,
+      deliverables: deliverableCount,
+      invoices: invoiceCount,
+      totalRevenue: invoiceTotal._sum.total || 0,
+      overdueInvoices,
+      pendingDeliverables,
+      projectsByStatus,
+      invoicesByStatus,
+      monthlyRevenue
+    });
+  } catch (error) {
+    console.error('Error stats:', error);
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+});
+
+// ============================
+// SOCKET.IO - CHAT EN TIEMPO REAL
+// ============================
+io.on('connection', (socket) => {
+  console.log('Usuario conectado:', socket.id);
+
+  socket.on('join', (userId) => {
+    socket.join(`user:${userId}`);
+    console.log(`Usuario ${userId} unido a su sala`);
+  });
+
+  socket.on('send_message', async (data) => {
+    try {
+      const { recipientId, content, senderId } = data;
+      
+      // Guardar en DB
+      const message = await prisma.message.create({
+        data: {
+          content,
+          senderId,
+          recipientId,
+          read: false,
+          threadId: [senderId, recipientId].sort().join('-')
+        },
+        include: {
+          sender: { select: { id: true, name: true, avatar: true } },
+          recipient: { select: { id: true, name: true, avatar: true } }
+        }
+      });
+
+      // Emitir al destinatario
+      io.to(`user:${recipientId}`).emit('new_message', message);
+      
+      // Emitir al emisor (confirmación)
+      io.to(`user:${senderId}`).emit('message_sent', message);
+    } catch (error) {
+      console.error('Error en socket send_message:', error);
+    }
+  });
+
+  socket.on('mark_read', async (data) => {
+    try {
+      const { senderId, recipientId } = data;
+      await prisma.message.updateMany({
+        where: {
+          senderId,
+          recipientId,
+          read: false
+        },
+        data: { read: true, readAt: new Date() }
+      });
+      io.to(`user:${senderId}`).emit('messages_read', { by: recipientId });
+    } catch (error) {
+      console.error('Error en socket mark_read:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Usuario desconectado:', socket.id);
+  });
+});
+
+// ============================
+// SERVIDOR
+// ============================
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+  console.log(`🚀 ClientPortal Pro API corriendo en http://localhost:${PORT}`);
+  console.log(`📡 Socket.io escuchando en el puerto ${PORT}`);
+});
+📱 APLICACIÓN MÓVIL (React Native + Expo) → APK
+javascript
+// App.js - React Native para Android
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl,
+  StatusBar,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { io } from 'socket.io-client';
+
+const API_URL = 'https://api.clientportal.pro';
+const Stack = createNativeStackNavigator();
+
+// ============================
+// PANTALLA DE LOGIN
+// ============================
+function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Completa todos los campos');
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        await AsyncStorage.setItem('token', data.token);
+        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+        navigation.replace('Dashboard');
+      } else {
+        setError(data.error || 'Credenciales inválidas');
+      }
+    } catch (err) {
+      setError('Error de conexión al servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.loginContainer}>
+      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+      <View style={styles.loginCard}>
+        <Icon name="account-circle" size={80} color="#3b82f6" style={styles.loginIcon} />
+        <Text style={styles.loginTitle}>ClientPortal Pro</Text>
+        <Text style={styles.loginSubtitle}>Inicia sesión en tu portal de clientes</Text>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#64748b"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Contraseña"
+          placeholderTextColor="#64748b"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity
+          style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+// ============================
+// PANTALLA PRINCIPAL (DASHBOARD)
+// ============================
+function DashboardScreen({ navigation }) {
+  const [user, setUser] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    loadUserAndData();
+  }, []);
+
+  const loadUserAndData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('user');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
+      await fetchDashboardData();
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      navigation.replace('Login');
+      return;
+    }
+
+    try {
+      const [statsRes, projectsRes] = await Promise.all([
+        fetch(`${API_URL}/api/stats`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_URL}/api/projects`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      }
+      if (projectsRes.ok) {
+        const projectsData = await projectsRes.json();
+        setProjects(projectsData);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchDashboardData().finally(() => setRefreshing(false));
+  };
+
+  const logout = async () => {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    navigation.replace('Login');
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#3b82f6" style={styles.loader} />
+      </SafeAreaView>
+    );
+  }
+
+  const isAdmin = user?.role === 'ADMIN';
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>ClientPortal Pro</Text>
+        <TouchableOpacity onPress={logout}>
+          <Icon name="logout" size={24} color="#94a3b8" />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#3b82f6" />
+        }
+        contentContainerStyle={styles.scrollContent}
+      >
+        {isAdmin ? (
+          // Panel ADMIN
+          <>
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{stats?.clients || 0}</Text>
+                <Text style={styles.statLabel}>Clientes</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{stats?.projects || 0}</Text>
+                <Text style={styles.statLabel}>Proyectos</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>${stats?.totalRevenue?.toFixed(0) || 0}</Text>
+                <Text style={styles.statLabel}>Ingresos</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{stats?.pendingDeliverables || 0}</Text>
+                <Text style={styles.statLabel}>Pendientes</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => navigation.navigate('Clients')}
+            >
+              <Icon name="people" size={24} color="#3b82f6" />
+              <Text style={styles.navButtonText}>Gestionar Clientes</Text>
+              <Icon name="chevron-right" size={24} color="#64748b" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => navigation.navigate('Projects')}
+            >
+              <Icon name="folder" size={24} color="#8b5cf6" />
+              <Text style={styles.navButtonText}>Ver Proyectos</Text>
+              <Icon name="chevron-right" size={24} color="#64748b" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => navigation.navigate('Invoices')}
+            >
+              <Icon name="receipt" size={24} color="#22c55e" />
+              <Text style={styles.navButtonText}>Facturas</Text>
+              <Icon name="chevron-right" size={24} color="#64748b" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => navigation.navigate('Messages')}
+            >
+              <Icon name="chat" size={24} color="#ec4899" />
+              <Text style={styles.navButtonText}>Mensajes ({stats?.unreadMessages || 0})</Text>
+              <Icon name="chevron-right" size={24} color="#64748b" />
+            </TouchableOpacity>
+          </>
+        ) : (
+          // Panel CLIENTE
+          <>
+            <Text style={styles.welcomeText}>¡Hola, {user?.name}!</Text>
+
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>{projects.length}</Text>
+                <Text style={styles.statLabel}>Proyectos</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>
+                  {projects.filter(p => p.status === 'IN_PROGRESS').length}
+                </Text>
+                <Text style={styles.statLabel}>En curso</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statValue}>
+                  {projects.reduce((sum, p) => sum + (p.deliverables?.filter(d => d.status === 'PENDING').length || 0), 0)}
+                </Text>
+                <Text style={styles.statLabel}>Pendientes</Text>
+              </View>
+            </View>
+
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Mis Proyectos</Text>
+            </View>
+
+            {projects.map((project) => (
+              <TouchableOpacity
+                key={project.id}
+                style={styles.projectCard}
+                onPress={() => navigation.navigate('ProjectDetail', { projectId: project.id })}
+              >
+                <View style={styles.projectHeader}>
+                  <Text style={styles.projectName}>{project.name}</Text>
+                  <View style={[styles.statusBadge, styles[`status_${project.status}`]]}>
+                    <Text style={styles.statusText}>
+                      {project.status === 'PLANNING' ? 'Planificando' :
+                       project.status === 'IN_PROGRESS' ? 'En curso' :
+                       project.status === 'REVIEW' ? 'Revisión' :
+                       project.status === 'COMPLETED' ? 'Completado' : 'Cancelado'}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.projectProgress}>{project.progress || 0}% completado</Text>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: `${project.progress || 0}%` }]} />
+                </View>
+                <Text style={styles.projectDeliverables}>
+                  {project.deliverables?.filter(d => d.status === 'APPROVED').length || 0}/
+                  {project.deliverables?.length || 0} entregables
+                </Text>
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => navigation.navigate('Messages')}
+            >
+              <Icon name="chat" size={24} color="#ec4899" />
+              <Text style={styles.navButtonText}>Chat con soporte</Text>
+              <Icon name="chevron-right" size={24} color="#64748b" />
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+// ============================
+// ESTILOS
+// ============================
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+  loginContainer: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loginCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 16,
+    padding: 30,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  loginIcon: {
+    marginBottom: 16,
+  },
+  loginTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#f1f5f9',
+    marginBottom: 4,
+  },
+  loginSubtitle: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginBottom: 24,
+  },
+  input: {
+    width: '100%',
+    backgroundColor: '#0f172a',
+    borderRadius: 10,
+    padding: 14,
+    color: '#f1f5f9',
+    fontSize: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  loginButton: {
+    width: '100%',
+    backgroundColor: '#3b82f6',
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  loginButtonDisabled: {
+    opacity: 0.5,
+  },
+  loginButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  errorText: {
+    color: '#ef4444',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1e293b',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#f1f5f9',
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#f1f5f9',
+    marginBottom: 16,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 16,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: '#1e293b',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#3b82f6',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginTop: 4,
+  },
+  sectionHeader: {
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#f1f5f9',
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1e293b',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+  },
+  navButtonText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#f1f5f9',
+    marginLeft: 12,
+  },
+  projectCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+  },
+  projectHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  projectName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#f1f5f9',
+  },
+  projectProgress: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginBottom: 6,
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: '#334155',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#3b82f6',
+    borderRadius: 3,
+  },
+  projectDeliverables: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  status_PLANNING: { backgroundColor: '#334155' },
+  status_IN_PROGRESS: { backgroundColor: '#3b82f6' },
+  status_REVIEW: { backgroundColor: '#8b5cf6' },
+  status_COMPLETED: { backgroundColor: '#22c55e' },
+  status_CANCELLED: { backgroundColor: '#ef4444' },
+  statusText: {
+    fontSize: 10,
+    color: 'white',
+    fontWeight: '500',
+  },
+});
+
+// ============================
+// NAVEGACIÓN
+// ============================
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Dashboard" component={DashboardScreen} />
+        <Stack.Screen name="Clients" component={ClientsScreen} />
+        <Stack.Screen name="Projects" component={ProjectsScreen} />
+        <Stack.Screen name="Invoices" component={InvoicesScreen} />
+        <Stack.Screen name="Messages" component={MessagesScreen} />
+        <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default App;
+Generar APK:
+
+bash
+# Instalar dependencias
+npm install -g expo-cli eas-cli
+expo build:android --release
+🖥️ APLICACIÓN DE ESCRITORIO (Electron) → EXE
+javascript
+// electron/main.js
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const path = require('path');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+let mainWindow;
+const isDev = process.env.NODE_ENV === 'development';
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    minWidth: 1024,
+    minHeight: 640,
+    icon: path.join(__dirname, 'assets/icon.ico'),
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false,
+    },
+    titleBarStyle: 'hiddenInset',
+    backgroundColor: '#0f172a',
+  });
+
+  // Cargar la app web
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:3000');
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  }
+
+  // Menú personalizado
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'ClientPortal Pro',
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideothers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    },
+    {
+      label: 'Archivo',
+      submenu: [
+        { label: 'Nuevo Proyecto', accelerator: 'CmdOrCtrl+N', click: () => {
+          mainWindow.webContents.send('menu-new-project');
+        }},
+        { label: 'Nueva Factura', accelerator: 'CmdOrCtrl+I', click: () => {
+          mainWindow.webContents.send('menu-new-invoice');
+        }},
+        { type: 'separator' },
+        { label: 'Exportar Datos', accelerator: 'CmdOrCtrl+E', click: () => {
+          mainWindow.webContents.send('menu-export-data');
+        }},
+      ]
+    },
+    {
+      label: 'Ver',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    {
+      label: 'Ventana',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { type: 'separator' },
+        { role: 'close' }
+      ]
+    },
+    {
+      label: 'Ayuda',
+      submenu: [
+        { label: 'Documentación', click: () => {
+          require('electron').shell.openExternal('https://docs.clientportal.pro');
+        }},
+        { label: 'Soporte', click: () => {
+          require('electron').shell.openExternal('mailto:support@clientportal.pro');
+        }},
+        { label: 'Reportar un problema', click: () => {
+          require('electron').shell.openExternal('https://github.com/clientportal/clientportal/issues');
+        }},
+      ]
+    }
+  ]);
+
+  Menu.setApplicationMenu(menu);
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+}
+
+// IPCs para sincronización
+ipcMain.handle('get-stats', async () => {
+  const stats = await prisma.$queryRaw`
+    SELECT 
+      (SELECT COUNT(*) FROM clients) as clients,
+      (SELECT COUNT(*) FROM projects) as projects,
+      (SELECT COUNT(*) FROM deliverables) as deliverables,
+      (SELECT COUNT(*) FROM invoices WHERE status = 'PENDING') as pending_invoices
+  `;
+  return stats;
+});
+
+ipcMain.handle('get-project', async (event, id) => {
+  return prisma.project.findUnique({
+    where: { id },
+    include: { deliverables: true, invoices: true }
+  });
+});
+
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+Generar EXE:
+
+bash
+# Instalar dependencias
+npm install electron-builder --save-dev
+
+# Construir
+npm run electron:build
+🌐 APLICACIÓN WEB (Next.js 16) → HTML
+jsx
+// app/page.jsx - Página principal con todos los estados
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { io } from 'socket.io-client';
+
+// ============================
+// COMPONENTES REUTILIZABLES
+// ============================
+const StatusBadge = ({ status }) => {
+  const colors = {
+    PLANNING: 'bg-slate-600',
+    IN_PROGRESS: 'bg-blue-600',
+    REVIEW: 'bg-purple-600',
+    COMPLETED: 'bg-green-600',
+    CANCELLED: 'bg-red-600',
+    PENDING: 'bg-yellow-600',
+    PAID: 'bg-green-600',
+    OVERDUE: 'bg-red-600',
+    DRAFT: 'bg-slate-600',
+  };
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || 'bg-slate-600'}`}>
+      {status}
+    </span>
+  );
+};
+
+const StatCard = ({ title, value, icon, color = 'blue' }) => (
+  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-sm text-gray-400">{title}</p>
+        <p className="text-2xl font-bold text-white">{value}</p>
+      </div>
+      <div className={`text-${color}-500 text-3xl`}>{icon}</div>
+    </div>
+  </div>
+);
+
+// ============================
+// PÁGINA PRINCIPAL
+// ============================
+export default function Home() {
+  const [view, setView] = useState('dashboard');
+  const [isAdmin, setIsAdmin] = useState(true);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Estados de datos
+  const [clients, setClients] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [deliverables, setDeliverables] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [selectedChat, setSelectedChat] = useState(null);
+
+  // Chat
+  const [chatInput, setChatInput] = useState('');
+  const [socket, setSocket] = useState(null);
+  const chatEndRef = useRef(null);
+
+  // ============================
+  // AUTENTICACIÓN
+  // ============================
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError('');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setToken(data.token);
+        setUser(data.user);
+        setIsAdmin(data.user.role === 'ADMIN');
+        setLoading(false);
+        loadData();
+        connectSocket(data.user.id);
+      } else {
+        setLoginError(data.error || 'Credenciales inválidas');
+      }
+    } catch (error) {
+      setLoginError('Error de conexión al servidor');
+    }
+  };
+
+  // ============================
+  // SOCKET.IO
+  // ============================
+  const connectSocket = (userId) => {
+    const newSocket = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001');
+    newSocket.on('connect', () => {
+      newSocket.emit('join', userId);
+    });
+    newSocket.on('new_message', (msg) => {
+      setMessages(prev => [...prev, msg]);
+      // Scroll al final
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    });
+    setSocket(newSocket);
+  };
+
+  // ============================
+  // CARGA DE DATOS
+  // ============================
+  const loadData = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const headers = { Authorization: `Bearer ${token}` };
+
+    try {
+      const [clientsRes, projectsRes, deliverablesRes, invoicesRes, statsRes] = await Promise.all([
+        fetch('/api/clients', { headers }),
+        fetch('/api/projects', { headers }),
+        fetch('/api/deliverables', { headers }),
+        fetch('/api/invoices', { headers }),
+        fetch('/api/stats', { headers }),
+      ]);
+
+      if (clientsRes.ok) setClients(await clientsRes.json());
+      if (projectsRes.ok) setProjects(await projectsRes.json());
+      if (deliverablesRes.ok) setDeliverables(await deliverablesRes.json());
+      if (invoicesRes.ok) setInvoices(await invoicesRes.json());
+      if (statsRes.ok) setStats(await statsRes.json());
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
+
+  // ============================
+  // RENDERIZADO DE VISTAS
+  // ============================
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Dashboard</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard title="Clientes" value={stats?.clients || 0} icon="👥" />
+        <StatCard title="Proyectos" value={stats?.projects || 0} icon="📂" color="purple" />
+        <StatCard title="Ingresos" value={`$${stats?.totalRevenue?.toFixed(0) || 0}`} icon="💰" color="green" />
+        <StatCard title="Pendientes" value={stats?.pendingDeliverables || 0} icon="⏳" color="red" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          <h3 className="text-lg font-semibold text-white mb-4">Proyectos Recientes</h3>
+          {projects.slice(0, 5).map(p => (
+            <div key={p.id} className="flex items-center justify-between py-2 border-b border-gray-700">
+              <span className="text-gray-200">{p.name}</span>
+              <StatusBadge status={p.status} />
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          <h3 className="text-lg font-semibold text-white mb-4">Facturas Recientes</h3>
+          {invoices.slice(0, 5).map(inv => (
+            <div key={inv.id} className="flex items-center justify-between py-2 border-b border-gray-700">
+              <span className="text-gray-200">{inv.number}</span>
+              <span className="text-green-400">${inv.total?.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderClients = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Clientes</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {clients.map(client => (
+          <div key={client.id} className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                {client.user?.name?.[0] || 'C'}
+              </div>
+              <div>
+                <p className="text-white font-semibold">{client.user?.name}</p>
+                <p className="text-sm text-gray-400">{client.company}</p>
+                <p className="text-sm text-gray-400">{client.email}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex gap-2 flex-wrap">
+              <span className="text-xs bg-gray-700 px-2 py-1 rounded-full">
+                {client.projects?.length || 0} proyectos
+              </span>
+              <span className="text-xs bg-gray-700 px-2 py-1 rounded-full">
+                {client.invoices?.length || 0} facturas
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderProjects = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Proyectos</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {projects.map(project => (
+          <div
+            key={project.id}
+            className="bg-gray-800 rounded-xl p-6 border border-gray-700 cursor-pointer hover:border-blue-500 transition"
+            onClick={() => { setSelectedProject(project); setView('projectDetail'); }}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">{project.name}</h3>
+              <StatusBadge status={project.status} />
+            </div>
+            <p className="text-sm text-gray-400 mt-1">{project.client?.user?.name || 'Sin cliente'}</p>
+            <div className="mt-4">
+              <p className="text-sm text-gray-400">Progreso: {project.progress || 0}%</p>
+              <div className="h-2 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                <div className="h-full bg-blue-600 rounded-full" style={{ width: `${project.progress || 0}%` }} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderInvoices = () => (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Facturas</h2>
+      <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-700">
+            <tr>
+              <th className="px-4 py-3 text-left text-sm text-gray-300">Número</th>
+              <th className="px-4 py-3 text-left text-sm text-gray-300">Cliente</th>
+              <th className="px-4 py-3 text-left text-sm text-gray-300">Total</th>
+              <th className="px-4 py-3 text-left text-sm text-gray-300">Estado</th>
+              <th className="px-4 py-3 text-left text-sm text-gray-300">Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invoices.map(inv => (
+              <tr
+                key={inv.id}
+                className="border-t border-gray-700 cursor-pointer hover:bg-gray-700/50 transition"
+                onClick={() => { setSelectedInvoice(inv); setView('invoiceDetail'); }}
+              >
+                <td className="px-4 py-3 text-white">{inv.number}</td>
+                <td className="px-4 py-3 text-gray-300">{inv.client?.user?.name || '-'}</td>
+                <td className="px-4 py-3 text-green-400">${inv.total?.toFixed(2)}</td>
+                <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
+                <td className="px-4 py-3 text-gray-400">{new Date(inv.issueDate).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderMessages = () => {
+    const chatPartners = isAdmin ? clients : [{ id: 'admin', name: 'Soporte', role: 'ADMIN' }];
+
+    return (
+      <div className="space-y-6 h-[600px] flex flex-col">
+        <h2 className="text-2xl font-bold text-white">Mensajes</h2>
+
+        <div className="flex flex-1 gap-4 min-h-0">
+          {/* Lista de contactos */}
+          <div className="w-64 bg-gray-800 rounded-xl border border-gray-700 overflow-y-auto">
+            {chatPartners.map(p => {
+              const contactId = isAdmin ? p.userId : 'admin';
+              const unread = messages.filter(m => m.senderId === contactId && !m.read).length;
+              return (
+                <div
+                  key={p.id}
+                  className={`p-3 cursor-pointer hover:bg-gray-700 transition border-b border-gray-700 ${
+                    selectedChat === contactId ? 'bg-gray-700' : ''
+                  }`}
+                  onClick={() => setSelectedChat(contactId)}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-white">{isAdmin ? p.user?.name || p.company : 'Soporte'}</span>
+                    {unread > 0 && (
+                      <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">{unread}</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Chat */}
+          <div className="flex-1 bg-gray-800 rounded-xl border border-gray-700 flex flex-col">
+            {selectedChat ? (
+              <>
+                <div className="p-4 border-b border-gray-700">
+                  <span className="text-white font-semibold">
+                    {isAdmin ? clients.find(c => c.userId === selectedChat)?.user?.name || 'Usuario' : 'Soporte'}
+                  </span>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                  {messages
+                    .filter(m => (m.senderId === selectedChat && m.recipientId === user?.id) ||
+                                (m.senderId === user?.id && m.recipientId === selectedChat))
+                    .map((m, i) => (
+                      <div
+                        key={i}
+                        className={`flex ${m.senderId === user?.id ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-[80%] p-3 rounded-lg ${
+                            m.senderId === user?.id
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-700 text-gray-200'
+                          }`}
+                        >
+                          {m.content}
+                          <span className="text-xs opacity-60 block mt-1">
+                            {new Date(m.createdAt).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  <div ref={chatEndRef} />
+                </div>
+
+                <div className="p-4 border-t border-gray-700 flex gap-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Escribe un mensaje..."
+                    className="flex-1 bg-gray-900 rounded-lg px-4 py-2 text-white border border-gray-600 focus:border-blue-500 outline-none"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && chatInput.trim()) {
+                        sendMessage(selectedChat, chatInput);
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => sendMessage(selectedChat, chatInput)}
+                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white font-semibold"
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-400">
+                Selecciona un contacto para chatear
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderProjectDetail = () => {
+    if (!selectedProject) return null;
+    return (
+      <div className="space-y-6">
+        <button
+          onClick={() => { setSelectedProject(null); setView('projects'); }}
+          className="text-blue-400 hover:text-blue-300 flex items-center gap-2"
+        >
+          ← Volver a proyectos
+        </button>
+
+        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white">{selectedProject.name}</h2>
+            <StatusBadge status={selectedProject.status} />
+          </div>
+          <p className="text-gray-400 mt-2">{selectedProject.description}</p>
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-400">Cliente</p>
+              <p className="text-white">{selectedProject.client?.user?.name}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Presupuesto</p>
+              <p className="text-white">${selectedProject.budget || 0}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Inicio</p>
+              <p className="text-white">{new Date(selectedProject.startDate).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Progreso</p>
+              <p className="text-white">{selectedProject.progress || 0}%</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          <h3 className="text-lg font-semibold text-white mb-4">Entregables</h3>
+          <div className="space-y-2">
+            {deliverables.filter(d => d.projectId === selectedProject.id).map(d => (
+              <div key={d.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                <div>
+                  <p className="text-white">{d.name}</p>
+                  <p className="text-sm text-gray-400">Vence: {new Date(d.dueDate).toLocaleDateString()}</p>
+                </div>
+                <StatusBadge status={d.status} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderInvoiceDetail = () => {
+    if (!selectedInvoice) return null;
+    return (
+      <div className="space-y-6">
+        <button
+          onClick={() => { setSelectedInvoice(null); setView('invoices'); }}
+          className="text-blue-400 hover:text-blue-300 flex items-center gap-2"
+        >
+          ← Volver a facturas
+        </button>
+
+        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white">{selectedInvoice.number}</h2>
+              <p className="text-gray-400">{selectedInvoice.client?.user?.name}</p>
+            </div>
+            <StatusBadge status={selectedInvoice.status} />
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-400">Subtotal</p>
+              <p className="text-white">${selectedInvoice.amount?.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">IVA</p>
+              <p className="text-white">${selectedInvoice.tax?.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Total</p>
+              <p className="text-2xl font-bold text-green-400">${selectedInvoice.total?.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-400">Fecha de vencimiento</p>
+              <p className="text-white">{new Date(selectedInvoice.dueDate).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          {selectedInvoice.items?.length > 0 && (
+            <div className="mt-6">
+              <h4 className="text-sm font-semibold text-gray-300 mb-2">Líneas de factura</h4>
+              <div className="space-y-2">
+                {selectedInvoice.items.map((item, i) => (
+                  <div key={i} className="flex justify-between p-2 bg-gray-700/50 rounded-lg">
+                    <span className="text-white">{item.description}</span>
+                    <span className="text-gray-300">
+                      {item.quantity} × ${item.unitPrice} = ${item.total}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderNav = () => {
+    const adminNav = [
+      { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+      { id: 'clients', label: 'Clientes', icon: '👥' },
+      { id: 'projects', label: 'Proyectos', icon: '📂' },
+      { id: 'deliverables', label: 'Entregables', icon: '📦' },
+      { id: 'invoices', label: 'Facturas', icon: '💰' },
+      { id: 'messages', label: 'Mensajes', icon: '💬' },
+    ];
+
+    const clientNav = [
+      { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+      { id: 'projects', label: 'Mis Proyectos', icon: '📂' },
+      { id: 'invoices', label: 'Mis Facturas', icon: '💰' },
+      { id: 'messages', label: 'Chat', icon: '💬' },
+    ];
+
+    const navItems = isAdmin ? adminNav : clientNav;
+
+    return (
+      <nav className="space-y-1">
+        {navItems.map(item => (
+          <button
+            key={item.id}
+            onClick={() => {
+              setView(item.id);
+              // Si vamos a mensajes, cargar mensajes
+              if (item.id === 'messages') loadMessages();
+            }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition ${
+              view === item.id
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+            }`}
+          >
+            <span className="text-xl">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
+    );
+  };
+
+  // ============================
+  // LOADING
+  // ============================
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400 mt-4">Cargando ClientPortal Pro...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================
+  // LOGIN
+  // ============================
+  if (!user || !token) {
+    return (
+      <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
+        <div className="bg-gray-900 rounded-2xl p-8 w-full max-w-md border border-gray-700">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-white">ClientPortal Pro</h1>
+            <p className="text-gray-400 mt-2">Portal de Automatización de Clientes</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="mt-8 space-y-4">
+            {loginError && (
+              <div className="bg-red-900/30 border border-red-800 text-red-300 p-3 rounded-lg text-sm">
+                {loginError}
+              </div>
+            )}
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 outline-none"
+            />
+
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 outline-none"
+            />
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg text-white font-semibold transition"
+            >
+              Iniciar Sesión
+            </button>
+          </form>
+
+          <p className="text-center text-gray-400 text-sm mt-4">
+            Demo: admin@portal.com / Admin123!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ============================
+  // MAIN APP
+  // ============================
+  return (
+    <div className="min-h-screen bg-[#0f172a] flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-gray-900 border-r border-gray-800 p-4 flex flex-col">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+            CP
+          </div>
+          <div>
+            <p className="text-white font-semibold">ClientPortal</p>
+            <p className="text-xs text-gray-400">Pro</p>
+          </div>
+        </div>
+
+        {renderNav()}
+
+        <div className="mt-auto pt-4 border-t border-gray-800">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gray-700 rounded-full flex items-center justify-center text-white font-semibold">
+              {user?.name?.[0] || 'U'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-white truncate">{user?.name}</p>
+              <p className="text-xs text-gray-400">{user?.role === 'ADMIN' ? 'Admin' : 'Cliente'}</p>
+            </div>
+            <button
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setUser(null);
+                setToken(null);
+                if (socket) socket.disconnect();
+              }}
+              className="text-gray-400 hover:text-white"
+            >
+              <span className="text-xl">🚪</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 p-6 overflow-y-auto">
+        {view === 'dashboard' && renderDashboard()}
+        {view === 'clients' && renderClients()}
+        {view === 'projects' && renderProjects()}
+        {view === 'deliverables' && renderDeliverables()}
+        {view === 'invoices' && renderInvoices()}
+        {view === 'messages' && renderMessages()}
+        {view === 'projectDetail' && renderProjectDetail()}
+        {view === 'invoiceDetail' && renderInvoiceDetail()}
+      </main>
+    </div>
+  );
+}
+🚀 COMANDOS PARA CONSTRUIR TODO
+1. Backend (API + Socket.io)
+bash
+# Instalar dependencias
+npm install express cors helmet prisma bcryptjs jsonwebtoken socket.io @prisma/client
+
+# Crear base de datos
+npx prisma migrate dev --name init
+
+# Ejecutar servidor
+node server.js
+2. Web (Next.js) → HTML
+bash
+npm run build
+npm run export
+# Los archivos estáticos están en la carpeta /out
+3. APK (Android)
+bash
+expo build:android --release
+# El APK estará en la carpeta /build
+4. EXE (Windows)
+bash
+npm run electron:build
+# El EXE estará en la carpeta /dist
+💰 ESTRATEGIA DE VENTA MILLONARIA
+Canal	Estrategia
+Landing Page	Demo interactiva en vivo, testimonios de agencias, casos de éxito
+Webinars	"Cómo automatizar la entrega de proyectos y aumentar retención de clientes en un 40%"
+Asociaciones	Agencias de marketing, consultoras tecnológicas, empresas de software
+Marketplaces	Gumroad, Sellfy, AppSumo (con descuento por lanzamiento)
+🎯 LLAMADA A LA ACCIÓN
+ClientPortal Pro es el producto que transforma cualquier negocio de servicios en una máquina de retención y facturación automática.
+
+Consigue tu licencia hoy y empieza a generar ingresos recurrentes. 🚀
+
+¿Necesitas el código completo en un solo archivo? ¿O prefieres una demostración en vivo? Contáctame y lo hacemos realidad.
+

@@ -1,0 +1,7 @@
+# Large binaries
+*.exe
+*.msi
+*.dmg
+*.AppImage
+node_modules/
+.next/

@@ -1,0 +1,502 @@
+  1001→  1001→Si necesitas algún archivo específico que no he incluido por espacio, indícamelo y te lo paso detallado.ch.
+  1002→  1002→
+  1003→  1003→## Backend – Supabase
+  1004→  1004→Use **Supabase** as the sole backend, providing:
+  1005→  1005→- **Authentication**: Email/Password sign‑up and login. Create a trigger or function that automatically assigns the role `client` to every new sign‑up. Seed one admin account manually (`admin@portal.com` / `Admin123!`) with role `admin` stored in a `profiles` table. Clients cannot sign up as admin.
+  1006→  1006→- **Database**: PostgreSQL with the following tables, columns, and relationships. Enable **Row Level Security (RLS)** on all tables and implement policies described below.
+  1007→  1007→- **Real‑time updates**: Enable Supabase Realtime for the `projects` (status changes), `deliverables` (status changes), `messages` (new messages). The frontend must subscribe to changes and update the UI instantly without page refresh.
+  1008→  1008→- **Storage** (optional but recommended): Avatar bucket for client profile pictures, with public read access and write restricted to the owner.
+  1009→  1009→
+  1010→  1010→### Database Schema (exact SQL structure)
+  1011→  1011→1. **profiles** (extends Supabase auth.users)
+  1012→  1012→   - `id` uuid PK references auth.users
+  1013→  1013→   - `role` text not null default 'client' check (role in ('admin','client'))
+  1014→  1014→   - `full_name` text
+  1015→  1015→   - `company` text
+  1016→  1016→   - `avatar_url` text
+  1017→  1017→   - `created_at` timestamptz default now()
+  1018→  1018→
+  1019→  1019→2. **clients** (managed by admin, linked to a profile)
+  1020→  1020→   - `id` uuid PK default gen_random_uuid()
+  1021→  1021→   - `profile_id` uuid FK references profiles(id) unique (to ensure one client per login)
+  1022→  1022→   - `company_name` text
+  1023→  1023→   - `contact_email` text
+  1024→  1024→   - `phone` text
+  1025→  1025→   - `notes` text
+  1026→  1026→   - `created_at` timestamptz default now()
+  1027→  1027→
+  1028→  1028→3. **projects**
+  1029→  1029→   - `id` uuid PK
+  1030→  1030→   - `client_id` uuid FK references clients(id) on delete cascade
+  1031→  1031→   - `title` text not null
+  1032→  1032→   - `description` text
+  1033→  1033→   - `status` text not null default 'Discovery' check (status in ('Discovery','In Progress','Review','Completed'))
+  1034→  1034→   - `start_date` date
+  1035→  1035→   - `target_end_date` date
+  1036→  1036→   - `created_at` timestamptz default now()
+  1037→  1037→   - `updated_at` timestamptz default now()
+  1038→  1038→
+  1039→  1039→4. **deliverables**
+  1040→  1040→   - `id` uuid PK
+  1041→  1041→   - `project_id` uuid FK references projects(id) on delete cascade
+  1042→  1042→   - `title` text not null
+  1043→  1043→   - `description` text
+  1044→  1044→   - `due_date` date
+  1045→  1045→   - `status` text default 'Pending' check (status in ('Pending','In Review','Approved','Rejected'))
+  1046→  1046→   - `created_at` timestamptz default now()
+  1047→  1047→
+  1048→  1048→5. **invoices**
+  1049→  1049→   - `id` uuid PK
+  1050→  1050→   - `client_id` uuid FK references clients(id) on delete cascade
+  1051→  1051→   - `invoice_number` text not null unique (e.g., 'INV-001')
+  1052→  1052→   - `issue_date` date not null
+  1053→  1053→   - `due_date` date not null
+  1054→  1054→   - `status` text default 'Draft' check (status in ('Draft','Sent','Paid','Overdue'))
+  1055→  1055→   - `total_amount` numeric(10,2) not null
+  1056→  1056→   - `notes` text
+  1057→  1057→   - `created_at` timestamptz default now()
+  1058→  1058→
+  1059→  1059→6. **invoice_items**
+  1060→  1060→   - `id` uuid PK
+  1061→  1061→   - `invoice_id` uuid FK references invoices(id) on delete cascade
+  1062→  1062→   - `description` text not null
+  1063→  1063→   - `quantity` int not null default 1
+  1064→  1064→   - `unit_price` numeric(10,2) not null
+  1065→  1065→   - `amount` numeric(10,2) generated always as (quantity * unit_price) stored
+  1066→  1066→
+  1067→  1067→7. **messages**
+  1068→  1068→   - `id` uuid PK
+  1069→  1069→   - `sender_id` uuid FK references profiles(id)
+  1070→  1070→   - `recipient_id` uuid FK references profiles(id) (null if a client sends to admin generally; admin can reply, set recipient)
+  1071→  1071→   - `project_id` uuid FK references projects(id) on delete set null (optional thread context)
+  1072→  1072→   - `content` text not null
+  1073→  1073→   - `is_read` boolean default false
+  1074→  1074→   - `created_at` timestamptz default now()
+  1075→  1075→
+  1076→  1076→### Row Level Security (RLS) Policies
+  1077→  1077→Apply these policies after table creation:
+  1078→  1078→
+  1079→  1079→- **profiles**: Users can select their own profile. Admin can select all.
+  1080→  1080→- **clients**: 
+  1081→  1081→  - Client: SELECT only where `profile_id = auth.uid()`. No INSERT/UPDATE/DELETE.
+  1082→  1082→  - Admin: full CRUD.
+  1083→  1083→- **projects**:
+  1084→  1084→  - Client: SELECT only where `client_id` matches the client record of the logged-in profile.
+  1085→  1085→  - Admin: full CRUD.
+  1086→  1086→- **deliverables**:
+  1087→  1087→  - Client: SELECT only if they own the parent project.
+  1088→  1088→  - Admin: full CRUD.
+  1089→  1089→- **invoices** & **invoice_items**:
+  1090→  1090→  - Client: SELECT only if `client_id` matches.
+  1091→  1091→  - Admin: full CRUD.
+  1092→  1092→- **messages**:
+  1093→  1093→  - Sender (client or admin) can INSERT with `sender_id = auth.uid()` and recipient according to logic. 
+  1094→  1094→  - Clients can SELECT messages where sender_id or recipient_id matches their profile id.
+  1095→  1095→  - Admin can SELECT all messages.
+  1096→  1096→  - Update (mark read) allowed by recipient.
+  1097→  1097→
+  1098→  1098→Use helper functions (e.g., `get_client_id_for_user()`) to simplify policies.
+  1099→  1099→
+  1100→  1100→### Seed Data
+  1101→  1101→Insert realistic demo data so the dashboard looks alive immediately. Include:
+  1102→  1102→- **3 clients** with different company names, emails, and one with an avatar.
+  1103→  1103→- **3 active projects** (one per client) with varied statuses: Discovery, In Progress, Review.
+  1104→  1104→- **8–10 deliverables** spread across the projects, some pending, some in review, one approved, with due dates spanning the next 30 days.
+  1105→  1105→- **5 invoices** with statuses Draft, Sent, Paid, and one Overdue (issue dates in the past, due dates before today). Each invoice must have 2–4 line items.
+  1106→  1106→- **20+ messages** between admin and the three clients, with realistic conversation snippets, some unread, spread over the last week.
+  1107→  1107→
+  1108→  1108→Provide the SQL INSERT statements that can be run in the Supabase SQL Editor.
+  1109→  1109→
+  1110→  1110→## Frontend – Next.js (App Router) with Tailwind CSS
+  1111→  1111→Build a **clean, minimalist, and professional** UI. Fully responsive (mobile-first). Use:
+  1112→  1112→- **Next.js 14 App Router** with React Server Components where appropriate, but client components for interactivity and real‑time.
+  1113→  1113→- **Tailwind CSS** for styling with a cohesive colour palette (indigo primary, neutral greys, subtle shadows). Use shadcn/ui components (Button, Card, Input, Dialog, Table, Badge, Avatar, Tabs, etc.) for consistency and speed.
+  1114→  1114→- **Supabase JS client** (`@supabase/supabase-js`) for auth, data, and real‑time.
+  1115→  1115→- **State management**: React Context for current user profile (role, client data). Custom hooks for fetching projects, deliverables, invoices, messages.
+  1116→  1116→- **Realtime subscriptions** using `supabase.channel()` to listen for INSERT/UPDATE on projects, deliverables, messages and update local state via SWR or React Query (optional but recommended: use SWR with a mutation that also updates the real‑time feed).
+  1117→  1117→
+  1118→  1118→### Routing & Page Structure
+  1119→  1119→```
+  1120→  1120→/app
+  1121→  1121→  /layout.tsx          – Root layout with providers, Supabase listener, auth check
+  1122→  1122→  /page.tsx            – Redirects to /dashboard for clients or /admin for admins
+  1123→  1123→  /login              – Login page (email/password) with sign‑up link
+  1124→  1124→  /signup             – Sign‑up page (only for clients, automatically assigns role)
+  1125→  1125→  /dashboard          – Client dashboard (protected route)
+  1126→  1126→    /layout.tsx        – Client sidebar/nav with links to sub‑pages
+  1127→  1127→    /page.tsx          – Overview: project status card, upcoming deliverables (next 7 days), latest invoice status, recent messages preview
+  1128→  1128→    /projects          – List of client’s projects with status badge, click to detail
+  1129→  1129→    /projects/[id]     – Project detail: description, deliverables list with status, associated messages thread
+  1130→  1130→    /invoices          – List of invoices, filterable by status
+  1131→  1131→    /invoices/[id]     – Invoice detail: all line items, print-friendly layout
+  1132→  1132→    /messages          – Chat interface: list of conversations (grouped by project or admin), click to open message thread, real‑time send/receive
+  1133→  1133→  /admin              – Admin panel (protected, only for role=admin)
+  1134→  1134→    /layout.tsx        – Admin sidebar with links
+  1135→  1135→    /page.tsx          – Dashboard overview: total clients, active projects, overdue invoices, recent messages across all clients
+  1136→  1136→    /clients           – Table of all clients with search, add/edit client (modal or page)
+  1137→  1137→    /clients/[id]      – Client detail: basic info, their projects, invoices, message history
+  1138→  1138→    /projects          – All projects with filters (client, status), inline status update
+  1139→  1139→    /projects/[id]     – Full project management (update status, add/edit deliverables)
+  1140→  1140→    /deliverables      – All deliverables view, sortable by due date/status, with quick actions
+  1141→  1141→    /invoices          – All invoices table, create new invoice (with dynamic line items), mark as sent/paid, PDF export (optional)
+  1142→  1142→    /invoices/[id]     – Edit invoice, view details
+  1143→  1143→    /messages          – Unified inbox: list of all conversations (client name + project), click to open chat, reply in real‑time, mark as read, filter by client/project
+  1144→  1144→```
+  1145→  1145→
+  1146→  1146→### Key Components (shadcn/ui based)
+  1147→  1147→- `DashboardCard` – summary stat cards (e.g., Projects, Deliverables, Invoices).
+  1148→  1148→- `StatusBadge` – coloured badge for status values.
+  1149→  1149→- `ProjectTimeline` – simple visual of project phases.
+  1150→  1150→- `DeliverableList` – sortable list with due dates and status.
+  1151→  1151→- `InvoiceTable` – responsive table with pagination.
+  1152→  1152→- `MessageThread` – chat bubbles with avatar, timestamp, read receipt, auto‑scroll to bottom.
+  1153→  1153→- `AdminLayout` / `ClientLayout` with responsive sidebar navigation (collapsible on mobile).
+  1154→  1154→- `ProtectedRoute` wrapper checking auth and role.
+  1155→  1155→
+  1156→  1156→### Authentication Flow
+  1157→  1157→- Use Supabase Auth UI or custom forms. On sign‑up, create a profile with `role = 'client'` via a database trigger. Optionally create a corresponding `clients` row automatically (with default company name from email domain) or let admin manually create client records and link profile later (for maximum control, use manual linking: after sign‑up, the client dashboard shows a “pending approval” state until admin links them to a client record). For simplicity in demo, the trigger can create both profile and an empty client record.
+  1158→  1158→- On login, fetch the profile and store role + client ID (if client) in a React context. Protect routes: if role is client, any access to `/admin/*` redirects to dashboard. If admin, access to `/dashboard` redirects to `/admin`. Use middleware for initial check.
+  1159→  1159→
+  1160→  1160→### Real‑time Implementation
+  1161→  1161→- On the client dashboard overview, subscribe to `projects` changes for that client to update project status live.
+  1162→  1162→- On the client messages page, subscribe to `messages` where recipient = current user or sender = current user for the selected project. New messages appear instantly.
+  1163→  1163→- On admin messages page, subscribe to all `messages` and show a notification dot for unread counts updated in real‑time.
+  1164→  1164→- Update local cache optimistically when sending a message (insert into state then sync with DB).
+  1165→  1165→
+  1166→  1166→### Admin Panel Capabilities (detailed)
+  1167→  1167→1. **Manage Clients & Projects**
+  1168→  1168→   - Client table with columns: Name, Company, Email, Active Projects count, Actions (Edit, Delete with confirmation).
+  1169→  1169→   - Add/Edit client form: fields for full name, company name, email, phone, notes. Link to a profile if not already linked (admin can search existing profiles). Save triggers upsert.
+  1170→  1170→   - From client detail page, button “Add Project”: form with title, description, start/end dates, initial status.
+  1171→  1171→   - Project list with filters by client dropdown and status tabs. Inline status change using a dropdown (Discovery → In Progress → Review → Completed) that instantly updates the DB and UI via real‑time.
+  1172→  1172→2. **Track Deliverables**
+  1173→  1173→   - Within a project detail or a dedicated deliverables view, admin can add a deliverable with title, description, due date, status.
+  1174→  1174→   - Quick status toggle (Pending → In Review → Approved/Rejected) with confirmation if marking approved.
+  1175→  1175→   - Deliverable list shows overdue items highlighted in red if past due date and not approved.
+  1176→  1176→3. **Billing & Invoices**
+  1177→  1177→   - Invoice creation wizard: select client, auto‑generate invoice number (INV‑XXX sequential), issue date defaults to today, due date +30 days. Add multiple line items (description, qty, unit price); total computed automatically.
+  1178→  1178→   - Ability to edit an invoice (only if Draft or Sent), add/remove items.
+  1179→  1179→   - Action buttons: “Mark as Sent”, “Mark as Paid”. When paid, update status; if due date is past and not paid, automatically display “Overdue” (can be a database trigger or a daily cron, but for demo simply compute on the fly: if status != 'Paid' and due_date < today, show 'Overdue' in UI).
+  1180→  1180→   - Invoice detail view with a printable layout (hidden print button shows only the invoice).
+  1181→  1181→4. **Centralized Messaging**
+  1182→  1182→   - Unified inbox shows list of unique client threads (latest message preview, unread count, timestamp). Click opens chat.
+  1183→  1183→   - Chat interface shows messages between admin and that client/project. Admin can select a project context from a dropdown to filter (default all). New messages sent by admin are assigned to recipient = client’s profile_id.
+  1184→  1184→   - Real‑time updates: new incoming client messages appear at the bottom, unread badge increments.
+  1185→  1185→   - Mark as read when admin views the thread.
+  1186→  1186→
+  1187→  1187→### Additional TechnicaTu backend con Supabase es una base excelente. Para añadir **procesos en segundo plano**, **auto‑regulación** y **capacidad de auto‑recuperación** como pides, vamos a extenderlo con mecanismos nativos de Supabase y un par de funciones inteligentes. Así el sistema se actualiza solo y se ajusta sin intervención manual.
+  1188→  1188→
+  1189→  1189→## 1. Procesos en segundo plano (Background Jobs)
+  1190→  1190→
+  1191→  1191→Supabase ofrece dos caminos limpios:
+  1192→  1192→
+  1193→  1193→- **pg_cron** (extensión de PostgreSQL) → Ideal para tareas recurrentes simples (cada minuto, hora, día).
+  1194→  1194→- **Edge Functions programadas** → Más potentes, con lógica compleja y llamadas externas.
+  1195→  1195→
+  1196→  1196→### 1.1 Actualización automática de facturas vencidas
+  1197→  1197→
+  1198→  1198→Queremos que las facturas con `status != 'Paid'` y `due_date < today()` pasen automáticamente a `'Overdue'`. Lo hará un trabajo diario.
+  1199→  1199→
+  1200→  1200→#### Paso 1 – Habilitar pg_cron en Supabase
+  1201→  1201→En el dashboard de Supabase, ve a `Database > Extensions` y activa `pg_cron`.  
+  1202→  1202→(Si no está disponible, usaremos una Edge Function programada).
+  1203→  1203→
+  1204→  1204→#### Paso 2 – Crear la función que actualiza
+  1205→  1205→Ejecuta en el SQL Editor:
+  1206→  1206→
+  1207→  1207→```sql
+  1208→  1208→create or replace function public.auto_mark_overdue_invoices()
+  1209→  1209→returns void
+  1210→  1210→language sql
+  1211→  1211→as $$
+  1212→  1212→  update public.invoices
+  1213→  1213→  set status = 'Overdue'
+  1214→  1214→  where status in ('Draft', 'Sent')
+  1215→  1215→    and due_date < current_date;
+  1216→  1216→$$;
+  1217→  1217→```
+  1218→  1218→
+  1219→  1219→#### Paso 3 – Programar la tarea
+  1220→  1220→```sql
+  1221→  1221→select cron.schedule(
+  1222→  1222→  'mark-overdue-invoices',  -- nombre único
+  1223→  1223→  '0 3 * * *',              -- todos los días a las 03:00 UTC
+  1224→  1224→  'select public.auto_mark_overdue_invoices();'
+  1225→  1225→);
+  1226→  1226→```
+  1227→  1227→
+  1228→  1228→Ya tienes un proceso automático que revisa las facturas cada noche y las marca como vencidas.
+  1229→  1229→
+  1230→  1230→### 1.2 Recordatorios de entregables próximos
+  1231→  1231→
+  1232→  1232→Puedes añadir otra función que inserte un mensaje automático al admin cuando un entregable está a 2 días de vencer y sigue “Pending”:
+  1233→  1233→
+  1234→  1234→```sql
+  1235→  1235→create or replace function public.notify_upcoming_deliverables()
+  1236→  1236→returns void
+  1237→  1237→language plpgsql
+  1238→  1238→as $$
+  1239→  1239→declare
+  1240→  1240→  admin_id uuid := '11111111-1111-1111-1111-111111111111'; -- tu admin
+  1241→  1241→  d record;
+  1242→  1242→begin
+  1243→  1243→  for d in
+  1244→  1244→    select d.title, d.due_date, p.client_id
+  1245→  1245→    from public.deliverables d
+  1246→  1246→    join public.projects p on p.id = d.project_id
+  1247→  1247→    where d.status = 'Pending'
+  1248→  1248→      and d.due_date = current_date + 2
+  1249→  1249→  loop
+  1250→  1250→    insert into public.messages (sender_id, recipient_id, content, is_read)
+  1251→  1251→    values (admin_id, admin_id, '⚠️ Entregable "'||d.title||'" vence en 2 días.', false);
+  1252→  1252→  end loop;
+  1253→  1253→end;
+  1254→  1254→$$;
+  1255→  1255→
+  1256→  1256→select cron.schedule('notify-deliverables', '0 8 * * *', 'select public.notify_upcoming_deliverables();');
+  1257→  1257→```
+  1258→  1258→
+  1259→  1259→## 2. Auto‑regulación y auto‑recuperación ante errores
+  1260→  1260→
+  1261→  1261→La “auto‑regulación” significa que el sistema se mantiene estable y se repara solo. Lo conseguimos con:
+  1262→  1262→
+  1263→  1263→- **Restricciones en la base de datos** (CHECK, NOT NULL, claves foráneas) → Ya las tienes.
+  1264→  1264→- **Triggers que corrigen inconsistencias** (ej. recalcular total de factura si se modifica un item).
+  1265→  1265→- **Reintentos automáticos en el frontend**.
+  1266→  1266→- **Reconexión automática de suscripciones realtime**.
+  1267→  1267→
+  1268→  1268→### 2.1 Trigger para mantener la integridad del total de la factura
+  1269→  1269→
+  1270→  1270→Aunque `invoice_items.amount` es una columna generada, podríamos necesitar que `invoices.total_amount` se actualice si se añade, modifica o elimina una línea. Para eso creamos un trigger:
+  1271→  1271→
+  1272→  1272→```sql
+  1273→  1273→-- Función que recalcula el total de una factura
+  1274→  1274→create or replace function public.update_invoice_total()
+  1275→  1275→returns trigger
+  1276→  1276→language plpgsql
+  1277→  1277→as $$
+  1278→  1278→begin
+  1279→  1279→  if TG_OP = 'DELETE' then
+  1280→  1280→    update public.invoices
+  1281→  1281→    set total_amount = (select coalesce(sum(amount),0) from public.invoice_items where invoice_id = OLD.invoice_id)
+  1282→  1282→    where id = OLD.invoice_id;
+  1283→  1283→  else
+  1284→  1284→    update public.invoices
+  1285→  1285→    set total_amount = (select coalesce(sum(amount),0) from public.invoice_items where invoice_id = NEW.invoice_id)
+  1286→  1286→    where id = NEW.invoice_id;
+  1287→  1287→  end if;
+  1288→  1288→  return null;
+  1289→  1289→end;
+  1290→  1290→$$;
+  1291→  1291→
+  1292→  1292→-- Asignar el trigger a la tabla invoice_items
+  1293→  1293→create trigger invoice_items_total_update
+  1294→  1294→after insert or update or delete on public.invoice_items
+  1295→  1295→for each row execute function public.update_invoice_total();
+  1296→  1296→```
+  1297→  1297→
+  1298→  1298→Así, si alguien manipula las líneas directamente, el total se ajusta solo.
+  1299→  1299→
+  1300→  1300→### 2.2 Auto‑recuperación en el frontend (reintentos y reconexión)
+  1301→  1301→
+  1302→  1302→**Reintentos en llamadas a la API**  
+  1303→  1303→Puedes envolver tus funciones de `lib/api.ts` con una estrategia simple de reintento:
+  1304→  1304→
+  1305→  1305→```typescript
+  1306→  1306→// lib/apiUtils.ts
+  1307→  1307→export async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+  1308→  1308→  for (let i = 0; i < retries; i++) {
+  1309→  1309→    try {
+  1310→  1310→      return await fn();
+  1311→  1311→    } catch (error) {
+  1312→  1312→      if (i === retries - 1) throw error;
+  1313→  1313→      console.warn(`Retry ${i+1} after error:`, error);
+  1314→  1314→      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i))); // backoff
+  1315→  1315→    }
+  1316→  1316→  }
+  1317→  1317→  throw new Error('Unreachable');
+  1318→  1318→}
+  1319→  1319→```
+  1320→  1320→
+  1321→  1321→Luego en `api.ts`:
+  1322→  1322→```typescript
+  1323→  1323→import { withRetry } from './apiUtils';
+  1324→  1324→
+  1325→  1325→export async function getClientProjects(clientId: string) {
+  1326→  1326→  return withRetry(() => supabase.from('projects').select('*').eq('client_id', clientId).order(...));
+  1327→  1327→}
+  1328→  1328→```
+  1329→  1329→
+  1330→  1330→**Reconexión automática de canales realtime**  
+  1331→  1331→El cliente de Supabase reintenta la conexión automáticamente, pero puedes añadir un listener para reiniciar el canal si falla:
+  1332→  1332→
+  1333→  1333→```typescript
+  1334→  1334→const channel = supabase.channel('room', {
+  1335→  1335→  config: { broadcast: { ack: true } },
+  1336→  1336→}).subscribe((status) => {
+  1337→  1337→  if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+  1338→  1338→    console.log('Canal cerrado, reconectando...');
+  1339→  1339→    setTimeout(() => channel.subscribe(), 2000);
+  1340→  1340→  }
+  1341→  1341→});
+  1342→  1342→```
+  1343→  1343→
+  1344→  1344→## 3. Actualización automática del esquema (migraciones)
+  1345→  1345→
+  1346→  1346→Si el proyecto crece, puedes usar las **Migraciones de Supabase** con la CLI (`supabase migration new`) para versionar los cambios de base de datos. En producción, un simple `supabase db push` aplica las migraciones sin perder datos. Esto garantiza que la estructura se “auto‑actualiza” de forma controlada.
+  1347→  1347→
+  1348→  1348→## 4. Orquestación con Edge Functions programadas (alternativa sin pg_cron)
+  1349→  1349→
+  1350→  1350→Si tu plan de Supabase no incluye pg_cron, crea una Edge Function que se ejecute periódicamente mediante un **Cron Job de Supabase** (disponible en el dashboard en `Edge Functions > Cron Jobs`).
+  1351→  1351→
+  1352→  1352→Ejemplo de función `update-overdue`:
+  1353→  1353→
+  1354→  1354→```typescript
+  1355→  1355→// supabase/functions/update-overdue/index.ts
+  1356→  1356→import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+  1357→  1357→import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  1358→  1358→
+  1359→  1359→serve(async (_req) => {
+  1360→  1360→  const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+  1361→  1361→  const { error } = await supabase
+  1362→  1362→    .from('invoices')
+  1363→  1363→    .update({ status: 'Overdue' })
+  1364→  1364→    .in('status', ['Draft', 'Sent'])
+  1365→  1365→    .lt('due_date', new Date().toISOString().split('T')[0]);
+  1366→  1366→  if (error) return new Response(JSON.stringify(error), { status: 500 });
+  1367→  1367→  return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
+  1368→  1368→});
+  1369→  1369→```
+  1370→  1370→
+  1371→  1371→Luego en el dashboard programa el cron: `0 3 * * *`.
+  1372→  1372→
+  1373→  1373→---
+  1374→  1374→
+  1375→  1375→Con estos añadidos tu portal será prácticamente **auto‑gestionado**:
+  1376→  1376→- Las facturas caducan solas.
+  1377→  1377→- El total de una factura se corrige si cambian sus líneas.
+  1378→  1378→- Los canales de chat se reconectan si fallan.
+  1379→  1379→- Las consult¡Me encanta que quieras un frontend **bellísimo**! Vamos a convertir la interfaz en una experiencia visual de altísimo nivel, manteniendo toda la funcionalidad que ya tienes pero elevando el diseño a algo premium, moderno y encantador.
+  1380→  1380→
+  1381→  1381→Te daré una guía completa con paleta de colores, tipografía, microinteracciones, animaciones y componentes rediseñados con Tailwind CSS y shadcn/ui. El resultado será un portal que impresione desde el primer vistazo.
+  1382→  1382→
+  1383→  1383→---
+  1384→  1384→
+  1385→  1385→## 🎨 Filosofía de diseño: “Minimalismo cálido con acentos vibrantes”
+  1386→  1386→
+  1387→  1387→- **Limpio**, pero con detalles que enamoran.
+  1388→  1388→- **Sombras suaves** y bordes redondeados generosos.
+  1389→  1389→- **Transiciones y micro‑animaciones** que hacen todo más vivo.
+  1390→  1390→- **Tipografía legible** con jerarquía clara.
+  1391→  1391→- **Colores** que transmiten confianza y modernidad.
+  1392→  1392→
+  1393→  1393→---
+  1394→  1394→
+  1395→  1395→## 1. Paleta de colores personalizada (Tailwind Config)
+  1396→  1396→
+  1397→  1397→Edita `tailwind.config.ts` para añadir una paleta extendida que usaremos en lugar de los colores por defecto:
+  1398→  1398→
+  1399→  1399→```ts
+  1400→  1400→// tailwind.config.ts
+  1401→  1401→import type { Config } from "tailwindcss";
+  1402→  1402→
+  1403→  1403→const config: Config = {
+  1404→  1404→  darkMode: "class",
+  1405→  1405→  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  1406→  1406→  theme: {
+  1407→  1407→    extend: {
+  1408→  1408→      colors: {
+  1409→  1409→        // Paleta principal
+  1410→  1410→        primary: {
+  1411→  1411→          50: "#f0f4ff",
+  1412→  1412→          100: "#dbe4ff",
+  1413→  1413→          200: "#bac8ff",
+  1414→  1414→          300: "#91a7ff",
+  1415→  1415→          400: "#748ffc",
+  1416→  1416→          500: "#5c7cfa",
+  1417→  1417→          600: "#4c6ef5",
+  1418→  1418→          700: "#4263eb",
+  1419→  1419→          800: "#3b5bdb",
+  1420→  1420→          900: "#364fc7",
+  1421→  1421→        },
+  1422→  1422→        // Acento para detalles cálidos
+  1423→  1423→        accent: {
+  1424→  1424→          50: "#fff9f0",
+  1425→  1425→          100: "#ffecce",
+  1426→  1426→          200: "#ffdba8",
+  1427→  1427→          300: "#ffc078",
+  1428→  1428→          400: "#ffa94d",
+  1429→  1429→          500: "#ff922b",
+  1430→  1430→          600: "#fd7e14",
+  1431→  1431→          700: "#f76707",
+  1432→  1432→          800: "#e8590c",
+  1433→  1433→          900: "#d9480f",
+  1434→  1434→        },
+  1435→  1435→        // Superficies
+  1436→  1436→        surface: {
+  1437→  1437→          light: "#ffffff",
+  1438→  1438→          dark: "#f8f9fa",
+  1439→  1439→          muted: "#f1f3f5",
+  1440→  1440→        },
+  1441→  1441→      },
+  1442→  1442→      fontFamily: {
+  1443→  1443→        sans: ["Inter", "system-ui", "sans-serif"],
+  1444→  1444→        display: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+  1445→  1445→      },
+  1446→  1446→      borderRadius: {
+  1447→  1447→        "2xl": "1rem",
+  1448→  1448→        "3xl": "1.5rem",
+  1449→  1449→      },
+  1450→  1450→      boxShadow: {
+  1451→  1451→        soft: "0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)",
+  1452→  1452→        card: "0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.03)",
+  1453→  1453→        elevated: "0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.03)",
+  1454→  1454→      },
+  1455→  1455→      animation: {
+  1456→  1456→        "fade-in": "fadeIn 0.5s ease-in-out",
+  1457→  1457→        "slide-up": "slideUp 0.4s ease-out",
+  1458→  1458→        "scale-in": "scaleIn 0.2s ease-out",
+  1459→  1459→      },
+  1460→  1460→      keyframes: {
+  1461→  1461→        fadeIn: {
+  1462→  1462→          "0%": { opacity: "0" },
+  1463→  1463→          "100%": { opacity: "1" },
+  1464→  1464→        },
+  1465→  1465→        slideUp: {
+  1466→  1466→          "0%": { opacity: "0", transform: "translateY(10px)" },
+  1467→  1467→          "100%": { opacity: "1", transform: "translateY(0)" },
+  1468→  1468→        },
+  1469→  1469→        scaleIn: {
+  1470→  1470→          "0%": { opacity: "0", transform: "scale(0.95)" },
+  1471→  1471→          "100%": { opacity: "1", transform: "scale(1)" },
+  1472→  1472→        },
+  1473→  1473→      },
+  1474→  1474→    },
+  1475→  1475→  },
+  1476→  1476→  plugins: [],
+  1477→  1477→};
+  1478→  1478→export default config;
+  1479→  1479→```
+  1480→  1480→
+  1481→  1481→Y en tu CSS global (`app/globals.css`), importa la fuente:
+  1482→  1482→
+  1483→  1483→```css
+  1484→  1484→@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
+  1485→  1485→
+  1486→  1486→body {
+  1487→  1487→  font-family: 'Inter', sans-serif;
+  1488→  1488→}
+  1489→  1489→```
+  1490→  1490→
+  1491→  1491→---
+  1492→  1492→
+  1493→  1493→## 2. Componentes bellísimos listos para copiar
+  1494→  1494→
+  1495→  1495→### 2.1 Sidebar premium con navegación animada
+  1496→  1496→
+  1497→  1497→```tsx
+  1498→  1498→// components/Sidebar.tsx
+  1499→  1499→'use client';
+  1500→  1500→import Link from 'next/link';
+
+[showing lines 1001-1500 of 2002; use offset=1501 with limit to continue reading]

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07120d">
+  <title>ClientPortal Pro</title>
+  <style>
+    :root{color-scheme:dark;--bg:#07120d;--panel:#0d1d16;--line:#234536;--text:#edf8f1;--muted:#9bb6a7;--accent:#22c55e;--danger:#fb7185}
+    *{box-sizing:border-box}html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    body{display:grid;grid-template-rows:auto 1fr}.bar{display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:var(--panel);border-bottom:1px solid var(--line)}
+    .brand{font-weight:800;letter-spacing:.02em}.status{color:var(--muted);font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    button,input{font:inherit}button{border:1px solid var(--line);background:#13281e;color:var(--text);padding:9px 12px;border-radius:6px;font-weight:700}button.primary{background:var(--accent);border-color:var(--accent);color:#03210f}
+    iframe{width:100%;height:100%;border:0;background:#fff}.setup{position:fixed;inset:0;z-index:4;display:grid;place-items:center;padding:24px;background:rgba(3,10,7,.94)}
+    .setup[hidden]{display:none}.card{width:min(520px,100%);padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 24px 80px #0008}.card h1{margin:0 0 8px;font-size:24px}.card p{color:var(--muted);line-height:1.5}.card label{display:block;margin:20px 0 8px;font-weight:700}.card input{width:100%;padding:12px;border:1px solid var(--line);border-radius:6px;background:#08150f;color:var(--text)}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.error{min-height:20px;color:var(--danger);font-size:13px;margin-top:10px}
+  </style>
+</head>
+<body>
+  <header class="bar"><span class="brand">ClientPortal Pro</span><span class="status" id="status">Configurar servidor</span><button id="settings" type="button">Servidor</button></header>
+  <iframe id="portal" title="Portal de clientes" allow="microphone; autoplay; clipboard-read; clipboard-write"></iframe>
+  <section class="setup" id="setup" aria-labelledby="setup-title">
+    <form class="card" id="form">
+      <h1 id="setup-title">Conectar con el portal</h1>
+      <p>Introduce la URL del servidor ClientPortal accesible desde este dispositivo. En la misma red puede ser, por ejemplo, <strong>http://192.168.1.20:3000</strong>.</p>
+      <label for="url">URL del servidor</label>
+      <input id="url" name="url" type="url" inputmode="url" required placeholder="https://portal.empresa.com" autocomplete="url">
+      <div class="error" id="error" role="alert"></div>
+      <div class="actions"><button id="cancel" type="button">Cancelar</button><button class="primary" type="submit">Conectar</button></div>
+    </form>
+  </section>
+  <script>
+    const key="clientportal.server";
+    const setup=document.getElementById("setup");
+    const input=document.getElementById("url");
+    const frame=document.getElementById("portal");
+    const status=document.getElementById("status");
+    const error=document.getElementById("error");
+    function normalize(value){return value.trim().replace(/\/+$/,"")}
+    function connect(value){const url=normalize(value);if(!/^https?:\/\//i.test(url)){error.textContent="La URL debe comenzar por http:// o https://";return}localStorage.setItem(key,url);status.textContent=url;frame.src=url;setup.hidden=true;error.textContent=""}
+    document.getElementById("form").addEventListener("submit",event=>{event.preventDefault();connect(input.value)});
+    document.getElementById("settings").addEventListener("click",()=>{input.value=localStorage.getItem(key)||"";setup.hidden=false;input.focus()});
+    document.getElementById("cancel").addEventListener("click",()=>{if(localStorage.getItem(key))setup.hidden=true});
+    frame.addEventListener("load",()=>{status.textContent=`Conectado: ${localStorage.getItem(key)||"servidor"}`});
+    const saved=localStorage.getItem(key);if(saved){input.value=saved;connect(saved)}else{setup.hidden=false}
+  </script>
+</body>
+</html>

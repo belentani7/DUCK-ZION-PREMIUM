@@ -1,0 +1,14 @@
+{
+  "name": "clientportal-pro-desktop",
+  "version": "0.2.0",
+  "description": "Aplicacion Windows autocontenida para ClientPortal Pro.",
+  "author": "ClientPortal Pro",
+  "private": true,
+  "main": "main.cjs",
+  "dependencies": {
+    "socket.io": "4.8.3"
+  },
+  "devDependencies": {
+    "electron": "43.4.0"
+  }
+}
